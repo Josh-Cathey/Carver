@@ -1,0 +1,465 @@
+<apex:page standardController="Opportunity" extensions="TargetListController" showHeader="false" sidebar="false" standardStylesheets="false">
+    <html>
+        <head>
+            <script src="{!$Resource.angularJs}"></script>
+            <script src="{!$Resource.ngTableJs}"></script>
+            <script src="{!$Resource.targetListAppJs}"></script>
+            <link rel="stylesheet" type="text/css" href="{!$Resource.ngTableCss}" />
+                <apex:slds />
+                    <c:targetListStyle />       
+                        <script type="text/javascript">
+                            var noOfRooms = ( '{!opp.of_Rooms__c}' == ''  ) ? 0 : '{!opp.of_Rooms__c}';
+            window.oppRec =  { 
+                recordId : '{!opp.Id}',
+                familyOfHotelBrand : '{!opp.Family_of_Hotel_Brands__c}',
+                state : '{!opp.State__c}',
+                noOfRoom : noOfRooms,
+                Name:'{!opp.Name}',
+                salaryLowRangeFactor :'{!opp.Salary_Low_Range_Factor__c}',
+                salaryHighRangeFactor:'{!opp.Salary_High_Range_Factor__c}'
+            };
+            console.log( "opprec::", window.oppRec );
+            window.setOppLineItem = '{!setOppLineItem}';
+            </script>
+            <style>
+                /*.slds-scope body, .slds-scope:not(html){font-family: 'Montserrat', sans-serif; color: #122e37; font-size:12px;}*/
+                .error{
+                border-color:red;
+                }
+                .popup  > div  {background: #fff; max-height: 100%; padding: 15px; vertical-align: middle; overflow: auto;}
+            </style>
+        </head>
+        <body>
+            <div class="content-wrap" ng-app="targetListApp" ng-controller="targetListController" ng-init="getData()"> 
+                <div class="table_filters">
+                    <label>
+                        <input type="checkbox" name="filterOne" ng-model="filters.StateFilter" />
+                        <span>State</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="filterTow" ng-model="filters.familyOfBrandsFilters" />
+                        <span>Family of Brands</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="filterThree" ng-model="filters.noOfRoomsFilter" />
+                        <span>No. of Rooms</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="filterFour" ng-model="filters.desiredSalary" />
+                        <span>Current Salary</span>
+                    </label>
+                    <a class="submit-button removBtn slds-button_neutral" href="javascript:void(0)" ng-click="getData()">
+                        <img src="{!URLFOR($Resource.SLDS0122, '/assets/icons/utility/filterList_60.png')}" style="max-width:13px;"/>
+                        <span> Remove Filter</span>
+                    </a>
+                </div>
+                <div class="table_controls slds-grid">
+                    <div class="page_length slds-col slds-align-top">
+                        <label>Show 
+                            <!--<select ng-model="dataObj.pageCount" ng-options="count for count in dataObj.targetListTblParams.settings().counts" ng-change="dataObj.targetListTblParams.count( dataObj.pageCount )"></select>-->
+                            <select ng-model="dataObj.pageCount" class="slds-input autoWidth" ng-options="count.value as count.label for count in dataObj.targetListTblParams.settings().counts" ng-change="changePerPageCount( dataObj.pageCount )"></select> entries
+                        </label>
+                    </div>
+                    
+                    <div class="table_filter slds-col slds-align-top">
+                        <label>Search:
+                            <input type="search" placeholder="" ng-model="dataObj.tableGlobalSearch" class="slds-input autoWidth"/>
+                        </label>
+                    </div>
+                </div>
+                <table ng-table="dataObj.targetListTblParams" template-pagination="custom/pager" class="table targetlist-table slds-table slds-table_bordered " cellspacing="0" width="100%">
+                    <!--<table ng-table="dataObj.targetListTblParams" class="table targetlist-table" cellspacing="0" width="100%">-->
+                    <thead>
+                        <tr>
+                            <th>                                
+                                <input type="checkbox" name="checkAllTargets" ng-model="dataObj.checkAll" ng-change="checkAllTargetList( dataObj.checkAll )" />                             
+                            </th>
+                            <th>Name</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>No. of Rooms</th>
+                            <th>Current Salary</th>
+                            <th>US Citizen</th>
+                            <th>Union Experience</th>
+                            <th>Will Relocate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr ng-repeat="target in $data track by target.recordId">
+                            <td>                                
+                                <input type="checkbox" name="selectTarget" ng-model="target.isChecked" ng-change="checkIfAllChecked( dataObj.checkAll )" ng-disabled="target.isTargetListPresent"  />
+                            </td>
+                            <td sortable="'name'">
+                                <a href="/{{target.recordId}}" target="_blank">{{target.name}}</a>
+                            </td>
+                            <td sortable="'mailingCity'">
+                                {{target.mailingCity}}
+                            </td>
+                            <td sortable="'mailingState'">
+                                {{target.mailingState}}
+                            </td>
+                            <td sortable="'noOfRoom'">
+                                {{target.noOfRoom}}
+                            </td>
+                            <td sortable="'desiredSalary'">
+                                {{target.desiredSalary}}
+                            </td>
+                            <td sortable="'uSCitizen'">
+                                <input type="checkbox" name="uSCitizen" ng-model="target.uSCitizen"  />
+                            </td>
+                            <td sortable="'unionExperience'">
+                                <input type="checkbox" name="unionExperience" ng-model="target.unionExperience"  />
+                            </td>
+                            <td sortable="'willRelocate'">
+                                <input type="checkbox" name="willRelocate" ng-model="target.willRelocate"  />
+                            </td>
+                        </tr>
+                        <tr ng-show="dataObj.targetList.length == 0">
+                            <td colspan="9" style="text-align:center;">No records found</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="clear:both"></div>
+                <div class="btnsDiv">
+                    <div id="btnDiv" class="" ng-if="dataObj.targetList.length">                
+                        <div class="buttons-wrap">
+                            <a class="submit-button slds-button slds-button_brand" tabindex="0" aria-controls="example" href="javascript:void(0)" ng-click="createTargetList()">
+                                <span>Create Target List</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div ng-controller="consultantController" class="">
+                        <div>
+                            <div class="buttons-wrap">
+                                <a class="submit-button slds-button slds-button_brand" tabindex="0" aria-controls="example" href="javascript:void(0)" ng-click="displayWizard()">
+                                    <span>Add New Candidate</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="slds-scope">
+                            <div id="wizardPopup" class="overlay" ng-hide="hideWizard.hideWizardPopup" ng-init="getRecruitingSource()"> 
+                                <div class="popup">
+                                    <a class="close" id="closeBtn" style="color: white;" href="javascript:void(0);" ng-click="closeWizard()">&times;</a>
+                                    <div>
+                                        
+                                        
+                                        <div class="slds-wizard" role="navigation">
+                                            <ol class="slds-wizard__list">
+                                                <li class="slds-wizard__item slds-is-active"   ng-repeat="step in steps"> <!--ng-class="{'slds-is-active':step.step==currentStep}"-->
+                                                    <a href="javascript:void(0);" class="slds-wizard__link">
+                                                        <span class="slds-wizard__marker"></span>
+                                                        <span class="slds-wizard__label slds-text-heading--label slds-truncate">{{step.label}}</span>
+                                                    </a>
+                                                </li>
+                                                
+                                            </ol>
+                                            <span class="slds-wizard__progress" style="z-index: inherit;">
+                                                <span class="slds-wizard__progress-bar" style="width:{{progressBarWidth}};"></span>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Step Content-->
+                                        
+                                        <div class="tab" ng-show="currentStep==1">
+                                            <form id="accountForm" name="vm.accountForm" novalidate="novalidate">  
+                                                <div class="slds-form-element "  ng-class="{'slds-has-error':vm.accountForm.firstName.$invalid && !vm.accountForm.firstName.$pristine}">
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="firstName" type="text" placeholder="First Name" ng-model="accountDetails.firstName" required="required" />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.accountForm.firstName.$invalid && !vm.accountForm.firstName.$pristine && !accountSubmitted">Please enter First Name</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.accountForm.firstName.$invalid && accountSubmitted">Please enter First Name</p>
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.accountForm.lastName.$invalid && !vm.accountForm.lastName.$pristine}">
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="lastName" type="text" placeholder="Last Name" ng-model="accountDetails.lastName"
+                                                               required="required" />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.accountForm.lastName.$invalid && !vm.accountForm.lastName.$pristine && !accountSubmitted">Please enter Last Name</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.accountForm.lastName.$invalid && accountSubmitted">Please enter Last Name</p>
+                                            </form>
+                                        </div>
+                                        
+                                        <div class="tab" ng-show="currentStep==2">
+                                            <form id="contactForm" name="vm.contactForm" novalidate="novalidate">    
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.firstName.$invalid && !vm.contactForm.firstName.$pristine}">
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="firstName" type="text" placeholder="First Name" ng-model="contactDetails.firstName"
+                                                               required="required" disabled="disabled" />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.firstName.$invalid && !vm.contactForm.firstName.$pristine && !contactSubmitted">Please enter First Name</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.firstName.$invalid && contactSubmitted">Please enter First Name</p>
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.lastName.$invalid && !vm.contactForm.lastName.$pristine}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="lastName" type="text" placeholder="Last Name" ng-model="contactDetails.lastName"
+                                                               required="required" disabled="disabled" />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.lastName.$invalid && !vm.contactForm.lastName.$pristine && !contactSubmitted">Please enter Last Name</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.lastName.$invalid && contactSubmitted">Please enter Last Name</p>
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.currentPositionTitle.$invalid && !vm.contactForm.currentPositionTitle.$pristine}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="currentPositionTitle" type="text" placeholder="Current Position" ng-model="contactDetails.currentPositionTitle"
+                                                               />
+                                                    </div>
+                                                </div><br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.Email.$invalid && !vm.contactForm.Email.$pristine && !contactSubmitted}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="Email" type="email" placeholder="Email" ng-model="contactDetails.Email"
+                                                               />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.Email.$invalid && !vm.contactForm.Email.$pristine && !contactSubmitted">Please enter valid Email</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.Email.$invalid && contactSubmitted">Please enter valid Email</p>
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.Phone.$invalid && !vm.contactForm.Phone.$pristine && !contactSubmitted}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="Phone" type="text" placeholder="Phone" ng-model="contactDetails.Phone"
+                                                               ng-minlength="10" ng-maxlength="10"  numeric-type="numeric-dot"   />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.Phone.$invalid && !vm.contactForm.Phone.$pristine && !contactSubmitted">Phone number should not be 10 digits</p>
+                                                <!--<p class="errorText" style="color:red;" ng-show="vm.contactForm.Phone.$invalid && contactSubmitted">Phone number should not be 10 digits</p>-->
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.city.$invalid && !vm.contactForm.city.$pristine}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" type="text" placeholder="City" ng-model="contactDetails.city"
+                                                               />
+                                                    </div>
+                                                </div><br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.state.$invalid && !vm.contactForm.state.$pristine}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="state" type="text" placeholder="State" ng-model="contactDetails.state"
+                                                               />
+                                                    </div>
+                                                </div><br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.currentlyEmployed.state.$invalid && !vm.currentlyEmployed.state.$pristine}">
+                                                    <div class="slds-form-element__control">
+                                                        <span class="slds-checkbox slds-checkbox_stacked">
+                                                            <input type="checkbox" name="options" id="checkbox-15" value="" ng-model="contactDetails.currentlyEmployed"/>
+                                                            <label class="slds-checkbox__label" for="checkbox-15">
+                                                                <span class="slds-checkbox_faux"></span>
+                                                                <span class="slds-form-element__label" style="text-align: left;">Currently Employed</span>
+                                                            </label>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.options.$invalid && !vm.contactForm.options.$pristine && !contactSubmitted">Please tick Currectly Employed</p>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.options.$invalid && contactSubmitted">Please tick Currectly Employed</p>
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.currentSalary.$invalid && !vm.contactForm.currentSalary.$pristine && !contactSubmitted}" >
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" name="currentSalary" type="text" placeholder="Current Salary" ng-model="contactDetails.currentSalary"
+                                                               numeric-dot="numeric-dot" value="0"     />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.currentSalary.$invalid && !vm.contactForm.currentSalary.$pristine && !contactSubmitted">Salary should be numeric</p>
+                                                <!--<p class="errorText" style="color:red;" ng-show="vm.contactForm.currentSalary.$invalid && contactSubmitted">Salary should be numeric</p>-->
+                                                <br />
+                                                <div class="slds-form-element" ng-class="{'slds-has-error':vm.contactForm.yearsOfExperience.$invalid && !vm.contactForm.yearsOfExperience.$pristine && !contactSubmitted}">
+                                                    
+                                                    <div class="slds-form-element__control">
+                                                        <input id="text-input-01" class="slds-input" type="text" name="yearsOfExperience" placeholder="Years of Experience" ng-model="contactDetails.yearsOfExperience"
+                                                               numeric-dot="numeric-dot" value="0"   />
+                                                    </div>
+                                                </div>
+                                                <p class="errorText" style="color:red;" ng-show="vm.contactForm.yearsOfExperience.$invalid && !vm.contactForm.yearsOfExperience.$pristine && !contactSubmitted">Years should be numeric</p>
+                                                <!--<p class="errorText" style="color:red;" ng-show="vm.contactForm.yearsOfExperience.$invalid && contactSubmitted">Years should be numeric</p>-->
+                                                <br />
+                                                <div class="slds-form-element">
+                                                    <label class="slds-form-element__label" for="select-01" style="text-align:left;">
+                                                        Recruting Source</label>
+                                                    <div class="slds-form-element__control">
+                                                        <div class="slds-select_container">
+                                                            
+                                                            <select aria-describedby="error-02" class="slds-select" id="select-01" ng-model="contactDetails.recruitingSource" ng-init="contactDetails.recruitingSource=contactDetails.recrutingSourceList[0]"  ng-options="x for x in contactDetails.recrutingSourceList" >
+                                                                
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </form>
+                                        </div>
+                                        
+                                        <div class="tab" ng-show="currentStep==3">
+                                            <div class="slds-grid tab3">
+                                                <div class="slds-col">
+                                                    <label>Opportunity Name:</label>
+                                                </div>
+                                                <div class="slds-col">
+                                                    <label><b>{{oppoturnityDetails.Name}}</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="slds-grid tab3">
+                                                <div class="slds-col">
+                                                    <label>Contact Name:</label>
+                                                </div>
+                                                <div class="slds-col">
+                                                    <label><b>{{oppoturnityDetails.ContactName}}</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div style="float:right;">
+                                            
+                                            <!--<button type="button" id="cancelBtn" class="slds-button slds-button--neutral" ng-click="closeWizard()">Close</button>-->
+                                            <button type="button" id="nextBtn" class="slds-button slds-button--brand" ng-click="nextStep(1)" ng-hide="currentStep==3">Next</button>
+                                            <button type="button" id="createTargetList" class="slds-button slds-button--brand" ng-click="createTargetList()" ng-show="currentStep==3">Create Target List</button>
+                                            
+                                        </div>
+                                        <div ng-hide="hideWizard.hideAccountConfirmBox">
+                                            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                                                <div class="slds-modal__container">
+                                                    <header class="slds-modal__header">
+                                                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                                                            </svg>
+                                                            <span class="slds-assistive-text">Close</span>
+                                                        </button>
+                                                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Confirm</h2>
+                                                    </header>
+                                                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                                        <p>Are you sure you want to save changes ?</p>
+                                                        
+                                                    </div>
+                                                    <footer class="slds-modal__footer">
+                                                        <button class="slds-button slds-button_neutral" ng-click="hideWizard.hideAccountConfirmBox=true">Cancel</button>
+                                                        <button class="slds-button slds-button_brand" ng-click="saveAccountDetails()">Save</button>
+                                                    </footer>
+                                                </div>
+                                            </section>
+                                            <div class="slds-backdrop slds-backdrop_open"></div>
+                                        </div>
+                                        <div ng-hide="hideWizard.hideContactConfirmBox">
+                                            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                                                <div class="slds-modal__container">
+                                                    <header class="slds-modal__header">
+                                                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                                                            </svg>
+                                                            <span class="slds-assistive-text">Close</span>
+                                                        </button>
+                                                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Confirm</h2>
+                                                    </header>
+                                                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                                        <p>Are you sure you want to save changes ?</p>
+                                                        
+                                                    </div>
+                                                    <footer class="slds-modal__footer">
+                                                        <button class="slds-button slds-button_neutral" ng-click="hideWizard.hideContactConfirmBox=true">Cancel</button>
+                                                        <button class="slds-button slds-button_brand" ng-click="saveContactDetails()">Save</button>
+                                                    </footer>
+                                                </div>
+                                            </section>
+                                            <div class="slds-backdrop slds-backdrop_open"></div>
+                                        </div>
+                                        <div ng-hide="hideWizard.hideTargetConfirmBox">
+                                            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                                                <div class="slds-modal__container">
+                                                    <header class="slds-modal__header">
+                                                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                                                            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                                                            </svg>
+                                                            <span class="slds-assistive-text">Close</span>
+                                                        </button>
+                                                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Success</h2>
+                                                    </header>
+                                                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                                                        <p>Success in creating Target List Record</p>
+                                                        
+                                                    </div>
+                                                    <footer class="slds-modal__footer">
+                                                        <button class="slds-button slds-button_neutral" ng-click="closeWizard()">Ok</button>
+                                                        
+                                                    </footer>
+                                                </div>
+                                            </section>
+                                            <div class="slds-backdrop slds-backdrop_open"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<div class="slds-notify_container slds-is-relative" ng-hide="hideWizard.hideErrorBox">
+                                <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+                                  <span class="slds-assistive-text">error</span>
+                                  <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#error" />
+                                    </svg>
+                                  </span>
+                                  <div class="slds-notify__content">
+                                    <h2 class="slds-text-heading_small ">{{errorMessage.message}}</h2>
+                                  </div>
+                                  <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close">
+                                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                                    </svg>
+                                    <span class="slds-assistive-text">Close</span>
+                                  </button>
+                                </div>
+                          </div>-->
+                        </div>
+                    </div>
+                </div>
+                
+            
+            <div id="popupBackground" ng-class="{ 'hidden' : !dataObj.showLoader }">
+                <div id="loading">
+                    <img style="width:100%;" src="{!URLFOR($Resource.SLDS0122, '/assets/images/spinners/slds_spinner_inverse.gif')}" alt="Loading...">
+                    Loading...
+                    </img>                        
+                </div>
+            </div>
+            <div class="overlay" id="popupMsgDiv" ng-class="{ 'hidden' : !dataObj.showPopupMsg }"> 
+                <div class="popup">
+                    <a class="close" href="javascript:void(0)" id="closeBtn" style="color: white;" ng-click="dataObj.showPopupMsg = false">×</a>
+                    <span class="content" id="popupAlertMsg" style="color:{{(showError) ? 'red' : ''}};">{{ dataObj.popupMessage }}</span>
+                    <!--<span class="content" id="popupAlertMsg" ng-if="!showError">{{ dataObj.popupMessage }}</span>-->
+                </div>
+            </div>
+        
+        
+        
+        <!---->
+        <!-- Start Add new consultant wizard -->
+        
+        
+        
+        <!-- End Add new consultant wizard -->
+        <script type="text/ng-template" id="custom/pager">
+        <div class="pagination_info" ng-show="pages.length">Showing {{ params.page() * params.count() }} to {{ ( ( ( params.page() * params.count() ) + params.count() ) > params.total() ) ? params.total() : ( ( ( params.page() * params.count() ) + params.count() ) - 1 ) }} of {{ params.total() }} entries</div>
+        <ul class="pagination ng-table-pagination">
+            <li ng-repeat="page in pages"
+            ng-class="{'disabled': (!page.active && (page.type == 'prev' || page.type == 'next') ), 'previous': page.type == 'prev', 'next': page.type == 'next', 'active' : page.current }"
+            ng-switch="page.type">
+                <a ng-switch-when="prev" ng-click="params.page( page.number );" href="javascript:void(0)">Previous</a>
+                <a ng-switch-when="first|page|last" ng-switch-when-separator="|" ng-click="params.page( page.number );" href="javascript:void(0)">{{ page.number }}</a>  
+                <a ng-switch-when="next" ng-click="params.page( page.number );" href="javascript:void(0)">Next</a>
+                </li>
+                </ul>
+                
+                </script>
+    </div>
+</body>
+</html>
+</apex:page>

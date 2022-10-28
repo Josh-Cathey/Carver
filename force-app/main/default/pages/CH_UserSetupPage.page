@@ -1,0 +1,1084 @@
+<!--    
+@description : Provides the facility to edit contact record fields.
+-->
+<apex:page controller="CH_UserSetupPageController" showHeader="false" standardStylesheets="false" sidebar="false" applyBodyTag="false" docType="html-5.0">
+    <!-- Remote Object Area -->
+    <apex:remoteObjects jsNamespace="RemoteSObject">
+        <apex:remoteObjectModel id="userRemoteId" name="User" jsShorthand="getUser" fields="Id,isNewUser__c"/>
+    </apex:remoteObjects>
+    <!-- / Remote Object Area -->
+    <head>
+        <title>Carver Hotel Group</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+        <!-- Included Design CSS And Scripts -->
+        <apex:stylesheet value="https://fonts.googleapis.com/css?family=Montserrat:400,700"/>
+        <apex:stylesheet value="{!URLFOR($Resource.UserSetupWizard, '/WizardSetup.css')}" />
+        <apex:stylesheet value="{!URLFOR($Resource.UserSetupWizard, '/selectize.default.css')}"/>
+        <apex:stylesheet value=""/>
+        <apex:includeScript value="https://code.jquery.com/jquery-latest.js"></apex:includeScript>
+        <apex:includeScript value="{!URLFOR($Resource.UserSetupWizard, '/selectize.js')}"/>
+        <!-- / Included Design CSS And Scripts -->      
+        
+        <style>
+            #second-step input[type=checkbox], #fift-step input[type=checkbox] { -webkit-appearance: none; -moz-apperance: none; appearance: none; border: 1px solid #ccc; background-color:#fff; padding: 0; width: 15px; height: 15px; box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.21); margin: 0 2px 0 0; position:relative;}
+            .systems-label { background-color: #fff; border: 1px solid lightgray; border-radius: 2px; padding: 8px 10px; font-size: 13px; margin-right: 7px; vertical-align: middle; box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); display: inline-block; }
+            #second-step input{padding: 10px; border: 1px solid #ccc; border-radius: 3px; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-family: 'Montserrat'; color: #2c3e50; font-size: 13px; box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); max-width: 50%;}
+            #first-step label, #second-step label, #fift-step label { font-size: 13px; padding: 0; }
+            #first-step input, #first-step textarea, #fift-step input { padding: 10px; border: 1px solid #ccc; border-radius: 3px; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-family: 'Montserrat'; color: #2c3e50; font-size: 13px; box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); }
+            input[type=checkbox]:checked:before, #fift-step input[type=checkbox]:checked:before { content: ''; width: 3px; height: 7px; display: block; position: absolute; border-bottom: 2px solid #1f97d5; border-right: 2px solid #1f97d5; transform: rotate(45deg); left: 4px; top: 1px; }
+            #second-step select{padding: 10px; border: 1px solid #ccc; border-radius: 3px; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-family: 'Montserrat'; color: #2c3e50; font-size: 13px; box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); max-width: 50%; max-height: 38px;}
+            .labelStyle{display:block;}
+            #fift-step{margin-top:20px;}
+            #fift-step input{max-width:50%; display:block;}
+            #fift-step input[type=checkbox] { display: inline-block; vertical-align: middle; }
+            .chk-label{margin-bottom:5px;}  
+            .space-top{padding-top:10px 0 5px;}
+            span.dateFormat a { color: #122e37; font-size: 14px; display: inline-block; }
+            span.dateFormat { display: none;}
+        </style>
+    </head>
+    <body id="htmlBodyId">
+        <apex:form id="apexFormId" html-onvalidate="true">
+            
+            <apex:actionFunction name="setBrandsList" action="{!setDependentBrands}" rerender="brandContainerDivId" oncomplete="$('.background-block').fadeOut(200);">
+                <apex:param name="bUpdateIndex" value=""/>
+                <apex:param name="listBrands" value=""/>
+            </apex:actionFunction>
+            
+            <apex:actionFunction name="addBrand" action="{!addNewBrand}" rerender="brandOutPannelId" oncomplete="$('.background-block').fadeOut(200);"/>
+            <apex:actionFunction name="removeBrand" action="{!removeBrand}" rerender="brandOutPannelId" oncomplete="$('.background-block').fadeOut(200);">
+                <apex:param name="bIndex" value=""/>
+            </apex:actionFunction>
+            
+            <apex:actionFunction name="addJobExp" action="{!addNewJobExperience}" rerender="jobExpOutPannelId" oncomplete="$('.background-block').fadeOut(200);"/>
+            <apex:actionFunction name="removeJobExp" action="{!removeJobExperience}" rerender="jobExpOutPannelId" oncomplete="$('.background-block').fadeOut(200);">
+                <apex:param name="jeIndex" value=""/>
+            </apex:actionFunction>
+            
+            <!-- <apex:actionFunction name="saveControllerData" action="{!saveAllData}" rerender="apexFormId">-->
+            <apex:actionFunction name="saveControllerData" action="{!saveAllData}" rerender="custom-script" oncomplete="redirectToCommunityLandingURL();$('.background-block').fadeOut(200);">
+                <apex:param name="langs" value=""/>
+                <apex:param name="ProfileImgURL" value=""/>
+                <apex:param name="currentStep" value=""/>
+            </apex:actionFunction>
+            
+            <!-- Show spinner -->
+           <div class="background-block" style="">
+                <div id="wait" style="color:white;">
+                    <img src="{!URLFOR($Resource.UserSetupWizard, '/slds_spinner_inverse.gif')}" width="64" height="64" />
+                    <br/>Loading..
+                </div>
+            </div>
+            
+            <!-- Spinner design -->
+           <!-- <div id="spinner" class="bgBlack" style="display: none;">
+                <div class="spinnerBg">
+                    <div class="loader"></div>                    
+                </div>
+            </div>-->
+            
+            <div class="header">
+                <div id="container">
+                    <div class="btn">
+                        <button id="logoutBtn" type="button" disabled="disabled" class="logoutBtn" onclick="top.location.href = '/secur/logout.jsp';">Logout</button>
+                    </div>
+                    <div class="welcome-psg">
+                        <h1>Welcome to the Carver Companies Community</h1>
+                        <p style="color:#cce5ed;">In order to get started as a community member we must first gather details regarding your background so that we can develop a profile.
+                            <br/>
+                            The more complete the profile, the more consultant assignments for which you will be eligible and/or the more permanent placements that you will qualify for. 
+                        </p>
+                    </div>
+                    <div id="Multi-step-form">
+                        <ul id="step-bar">
+                            <li class="active">
+                                <span class="list-txt">
+                                    <a id="step1" href="#first-step">Your General Background</a>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="list-txt">
+                                    <a id="step2" href="#second-step">Profile Picture &amp; Resume</a>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="list-txt">
+                                    <a id="step3" href="#third-step">Hotel Brands</a>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="list-txt">
+                                    <a id="step4" href="#forth-step">Recent Employement History Review</a>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="list-txt">
+                                    <a id="step5" href="#fift-step">Additional information</a>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="container">
+                <div id="errorDivId" style=" margin-top: 25px; color: red; display: none;"></div>
+            </div>
+            <div id="Multi-step-form">
+                <!--First Step-->
+                <div id="container">
+                    <div id="first-step" class="done allsteps">
+                        <div class="step-header">
+                            <h1>Your General Background</h1>
+                            <p>Please begin here with your  General Background Information. It is recommended you complete all the inputs in the same session so please give yourself 30 minutes to complete. </p>
+                        </div>
+                        <div class="first-column">
+                            <div class="first-name" >
+                                <label class="fname">First Name :</label>
+                                <apex:inputField value="{!contactObj.FirstName}" styleClass="firstImp" html-placeholder="First Name" style="border-color:{!if(ISBLANK(contactObj.FirstName),'red','')};"/>
+                            </div>
+                            <div class="last-name">
+                                <label class="lname">Last Name :</label>
+                                <apex:inputField value="{!contactObj.LastName}" styleClass="firstImp" html-placeholder="Last Name" style="border-color:{!if(ISBLANK(contactObj.LastName),'red','')};"/>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                        <div class="second-column">
+                            <div class="legalName-info" >
+                                <label class="email">Legal Name :</label>
+                                <apex:inputField value="{!contactObj.Legal_Name__c}" styleClass="firstImp" html-placeholder="Legal Name" style="border-color:{!if(ISBLANK(contactObj.Legal_Name__c),'red','')};"/>
+                            </div>
+                            <div class="email-info" >
+                                <label class="email">Email Address :</label>
+                                <apex:inputField id="emailId" styleClass="emailClass firstImp" type="email" value="{!contactObj.Email}" html-placeholder="E-mail" style="border-color:{!if(ISBLANK(contactObj.Email),'red','')};"/>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                        <div class="third-column">
+                            <div class="other-info">
+                                <label class="phone">Phone Number :</label>
+                                <apex:inputField type="tel" value="{!contactObj.Phone}" styleClass="firstImp" html-placeholder="Phone" style="border-color:{!if(ISBLANK(contactObj.Phone),'red','')};"/>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                        <div class="forth-column">
+                            <label class="add-text">Address Details :</label>
+                            <apex:inputField value="{!contactObj.MailingStreet}" styleClass="firstImp" html-placeholder="Street" style="border-color:{!if(ISBLANK(contactObj.MailingStreet),'red','')};"/>
+                        </div>
+                        <div class="fifth-column">
+                            <div class="city-state-info">
+                                <div class="city-col">
+                                    <label class="city">City :</label>
+                                    <apex:inputField value="{!contactObj.MailingCity}" styleClass="firstImp" html-placeholder="City" style="border-color:{!if(ISBLANK(contactObj.MailingCity),'red','')};"/>
+                                </div>
+                                <div class="state-col">
+                                    <label class="state">State :</label>
+                                    <apex:inputField value="{!contactObj.MailingState}" styleClass="firstImp" html-placeholder="State" style="border-color:{!if(ISBLANK(contactObj.MailingState),'red','')};"/>
+                                </div>
+                            </div>
+                            <div class="zip-col">
+                                <label class="zip-code">Zip Code :</label>
+                                <apex:inputField value="{!contactObj.MailingPostalCode}" styleClass="firstImp" html-placeholder="Zip Code" style="border-color:{!if(ISBLANK(contactObj.MailingPostalCode),'red','')};"/>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                    <!--Second Step-->
+                    <div id="container">
+                        <div id="second-step" class="allsteps">
+                            <div class="step-header">
+                                <h1>Profile Picture &amp; Resume</h1>
+                                <p>Attach Resume, upload Profile Picture and answer additional work related skills and technical experience. </p>
+                            </div>
+                            <div class="upload-section">
+                                <div id="resume-upload">
+                                    <div class="resume-section">
+                                        <button type="button" class="upload-resume" onclick="$('.resumeInId').trigger('click');">Upload Resume</button>
+                                        <input type="file" accept=".pdf, .doc, .docx" class="resumeInId" style="display: none;"/>
+                                        <ul class="file-type">
+                                            <li onclick="removeFile('resume');">my_resume.docx </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div id="picture-upload">
+                                    <div class="picture-section">
+                                        <button type="button" class="upload-resume" onclick="$('.profileInId').trigger('click');">Upload Profile Picture</button>
+                                        <input type="file" accept="image/*" class="profileInId" style="display: none;"/>
+                                        <ul class="file-type">
+                                            <li onclick="removeFile('profile');">my_profile_pic.jpg </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+                            <div id="uploadMsgDivId" style="margin-top:25px;display:none;"/>
+                            <div class="checklist-label" id="skillTechExp">
+                                <h1>Skills Technical Experience Section</h1>
+                            </div>
+                            <fieldset class="check-list">
+                                <legend>Automated Systems:</legend>
+                                <div style="padding-bottom:10px;">
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.CI_TY__c}" styleClass="cityCheckBox" onclick="checkChange( this, 'cityCheckBox')"/>
+                                        <!-- <input type="checkbox" name="CITY" value=""/>-->
+                                        <label>CI/TY</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Delphi__c}"  styleClass="delphiCheckBox" onclick="checkChange( this, 'delphiCheckBox')"/>
+                                        <label>Delphi</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Envision__c}"/>
+                                        <label>Envision</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.ISAC__c}"/>
+                                        <label>ISAC</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.SalesPro__c}"/>
+                                        <label>SalesPro</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="city-fields">
+                                    <div class="">
+                                        <label class="labelStyle" style="line-height:25px;">CI/TY EID # <span style="color:red;display:none;" class="required-mark">*</span></label> 
+                                        <apex:inputField value="{!contactObj.CI_TY_EID__c}" styleClass="cityEid" />  
+                                        <p class="errorClass" style="display:none;color:red;">
+                                            This field is required.
+                                        </p>
+                                    </div>
+                                    <div class="">
+                                        <label class="labelStyle">CI/TY Date Certified  <span style="color:red;display:none;line-height:25px;" class="required-mark">*</span></label>
+                                        <apex:inputField value="{!contactObj.CI_TY_Date_Certified__c}" styleClass="cityDateCertified" type="date"/>  
+                                        <p class="errorClass" style="display:none;color:red;">
+                                            This field is required.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="delphi-fields">
+                                    <div>
+                                        <label class="labelStyle" style="line-height:25px;">Delphi Standard or FDC <span style="color:red;display:none;" class="required-mark">*</span></label>
+                                        <apex:selectList id="DelphiStandard" value="{!contactObj.Delphi_Standard_or_FDC__c}" size="1"  styleClass="delphiSelect">
+                                            <apex:selectOptions value="{!DelphiStandard}"/>
+                                        </apex:selectList>
+                                        <p class="delphiErrorClass errorClass" style="display:none;color:red;">
+                                            This field is required.
+                                        </p>
+                                    </div> 
+                                </div>
+                                
+                                <!-- <div class="systems-label">
+<apex:inputField value="{!contactObj.SFA__c}"/>
+<label>SFA</label>
+</div> -->
+                                <div class="other-stystems">
+                                    <label class="other-label" style="line-height:25px;">Other Automated Systems:</label>
+                                    <apex:inputField value="{!contactObj.Other_Automated_Sytems__c}" html-placeholder="Enter Other Automated Systems"/>
+                                </div>
+                            </fieldset>
+                            <fieldset class="check-list" style="margin-top:30px;">
+                                <legend>PMS Systems:</legend>
+                                <div style="padding-bottom:10px;">
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Opera__c}"/>
+                                        <label>Opera</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.OnQ__c}"/>
+                                        <label>OnQ</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Galaxy_LightSpeed__c}"/>
+                                        <label>Galaxy/LightSpeed</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Opera_Cloud__c}"/>
+                                        <label>Opera Cloud</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Fosse__c}"/>
+                                        <label>Fosse</label>
+                                    </div>
+                                    <div class="systems-label">
+                                        <apex:inputField value="{!contactObj.Marsha__c}"/>
+                                        <label>Marsha</label>
+                                    </div>
+                                </div>
+                                <div class="other-stystems">
+                                    <label class="other-label">Other PMS Systems: </label>
+                                    <apex:inputField value="{!contactObj.Other_PMS_Systems__c}" html-placeholder="Enter Other Systems Names"/>
+                                </div>
+                            </fieldset>                            
+                            <fieldset class="check-list" style="margin-top:30px;">
+                                <legend>Languages:</legend>
+                                <div class="other-Languages">
+                                    <label class="other-lang-label">Select Languages: (Click on a Language(s) to select, backspace to remove a Language.)</label>
+                                    <select id="selectLanguagesId" placeholder="Select a Languages..."></select>
+                                </div>
+                                <div class="other-stystems">
+                                    <label class="other-auto-label">Other Languages:</label>
+                                    <apex:inputField value="{!contactObj.Other_Languages__c}" html-placeholder="Enter other languages.."/>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <!--Third Step-->
+                        <div id="third-step" class="allsteps">
+                            <div class="step-header">
+                                <h1>Hotel Brands</h1>
+                                <p>Select all the Family of Brands and Brands you have worked for. Select “Other” on Family of Brands if Brand is not available and then enter the name in the “Other Brands” field.  Enter each one on a separate screen by clicking on “Add Brand” until you are finished adding all the Hotel Brands you have worked for. Then click “Next” to be taken to Step 4.</p>
+                            </div>
+                            <div id="brandContainerDivId">
+                                <apex:outputPanel id="brandOutPannelId">
+                                    <apex:variable value="{!1}" var="Bcounter"/>
+                                    <apex:repeat value="{!listBrands}" var="brand">
+                                        <fieldset class="brandFiedset" style="margin-top:30px;">
+                                            <legend>Brand {!Bcounter}</legend>
+                                            <div id="BerrorDivId" style="color: red;"/>
+                                            <div id="BlegendTxt{!Bcounter}" style="display:none;"/>
+                                            <div id="BrButtonDivId" style="float:right; margin:-15px;">
+                                                <button type="button" class="Bcompact-btn">
+                                                    <img src="{!URLFOR($Resource.UserSetupWizard, '/minus.png')}" alt="close" width="30px;" height="30px;"></img>
+                                            </button>
+                                            <button type="button" id="closeBtnId{!Bcounter}" onclick="$('.background-block').show();$(this).parent().hide(200);removeBrand({!Bcounter});" class="close-btn" style="display:{!IF(Bcounter==1,'none','inline-block')};">
+                                                <img src="{!URLFOR($Resource.UserSetupWizard, '/closebtn.png')}" alt="close" width="30px;" height="30px;"></img>
+                                        </button>
+                                    </div>
+                                    <div class="clear"></div>
+                                    <div class="picklist">
+                                        <div class="brand-picklist">
+                                            <label class="brand-label">Family of Brands :</label>
+                                            <apex:inputField id="FamilyOfBrandsId" value="{!brand.Family_of_Brands__c}" onchange="prepareBrands(this, {!Bcounter})"
+                                                             styleClass="family-picklist {!IF(Bcounter==1,'firstImp','eitherClass')}" style="border-color:{!if((ISBLANK(brand.Family_of_Brands__c) && Bcounter==1),'red','')};"/>
+                                        </div>
+                                        <div id="brandsDivId" class="searchWrap" style="display:{!IF(ISBLANK(brand.Brands__c),'none','block')};">
+                                            <label class="brand-label">Brands: (Click on a Brand(s) to select, backspace to remove a Brand.)</label>
+                                            <div id="multiselectDivId{!Bcounter}"/>
+                                        </div>
+                                    </div>
+                                    <div class="other-brandslist">
+                                        <label class="brand-label">Other Brands :</label>
+                                        <apex:inputField styleClass="otherBrands {!IF(Bcounter==1,'','eitherClass')}" type="text" label="Other Brands.." 
+                                                         onkeyup="checkOtherBrandValue(this);" 
+                                                         value="{!brand.Other_Brand__c}"/>
+                                    </div>
+                                </fieldset>
+                                <apex:variable var="Bcounter" value="{!Bcounter+1}"/>
+                                <script type="text/javascript">
+                                if('{!brand.Family_of_Brands__c}'){
+                                    $('#BlegendTxt{!Bcounter-1}').text('{!brand.Family_of_Brands__c}');
+                                    CH_UserSetupPageController.getDependentBrands(
+                                        '{!brand.Family_of_Brands__c}', '{!Bcounter-1}', '{!brand.Brands__c}',
+                                        function(result, event) {
+                                            var listSelected = result.substring(result.lastIndexOf("|"));
+                                            //console.log(result.split('|')[1]);
+                                            var listOptions = result.substring(result.indexOf("|"), 0);
+                                            var listSelected = result.split('|').pop();
+                                            jsonOptions = [];
+                                            
+                                            if(listOptions.split(',').length > 1) {
+                                                $('#multiselectDivId'+result.split('|')[1]).parent().show(200)
+                                                listOptions.split(',').forEach(function(option){
+                                                    //console.log('option : ' + option);
+                                                    jsonOptions.push( { id: option, title : option, url: '' } );
+                                                });
+                                                $('#multiselectDivId'+result.split('|')[1]).html('<select id="'+result.split('|')[1]+'" onchange="setBrandVlues(this);" placeholder="Select a Brands..."></select>');
+                                                BrandsControl[result.split('|')[1]] = $('#'+result.split('|')[1]).selectize({
+                                                    maxItems: null,
+                                                    valueField: 'title',
+                                                    labelField: 'title',
+                                                    searchField: 'title',
+                                                    options: jsonOptions,
+                                                    create: false
+                                                });
+                                                BrandsControl[result.split('|')[1]][0].selectize.setValue(listSelected.split(';'));
+                                            } else {
+                                                $('#multiselectDivId'+result.split('|')[1]).parent().hide(200);
+                                            }
+                                            
+                                        }, {
+                                            buffer: true,
+                                            escape: true,
+                                            timeout: 120000
+                                        }
+                                    );
+                                } else {
+                                    if('{!brand.Other_Brand__c}') {
+                                        $('#BlegendTxt{!Bcounter-1}').text('{!brand.Other_Brand__c}');
+                                    }
+                                }
+                                if(!($('#BlegendTxt{!Bcounter-1}').text())) {
+                                    $('#BlegendTxt{!Bcounter-1}').parent().find('.Bcompact-btn').fadeOut(200);
+                                }
+                                if('{!brand.Family_of_Brands__c}' === 'Other') {
+                                    if(!($('#BlegendTxt{!Bcounter-1}').parent().find('.otherBrands').val()))
+                                        $('#BlegendTxt{!Bcounter-1}').parent().find('.otherBrands').addClass('firstImp').css('border-color','red');
+                                }
+                                </script>
+                            </apex:repeat>
+                            <script type="text/javascript">
+                            $('.firstImp').change(function() {
+                                //console.log($(this).val());
+                                if ($(this).val().trim().length > 0) {
+                                    $(this).css('border-color', '');
+                                } else {
+                                    $(this).css('border-color', 'red');
+                                }
+                            });
+                            function prepareBrands(FamilyBrandsObj, bcounter) {
+                                if($(FamilyBrandsObj).val()) {
+                                    $('.background-block').show();
+                                    $(FamilyBrandsObj).css('border-color','');
+                                    $(FamilyBrandsObj).parent().parent().parent().find( '[id*=BerrorDivId]' ).text('');
+                                    $(FamilyBrandsObj).parent().parent().parent().find( '[id*=BlegendTxt]' ).text($(FamilyBrandsObj).val());
+                                    $(FamilyBrandsObj).parent().parent().parent().find(".Bcompact-btn").fadeIn(200);
+                                    
+                                    CH_UserSetupPageController.getDependentBrands(
+                                        $(FamilyBrandsObj).val(), bcounter, null,
+                                        function(result, event) {
+                                            var listSelected = result.substring(result.lastIndexOf("|"));
+                                            //console.log(result.split('|')[1]);
+                                            var listOptions = result.substring(result.indexOf("|"), 0);
+                                            var listSelected = result.split('|').pop();
+                                            jsonOptions = [];
+                                            //console.log(listOptions.split(',').length);
+                                            if(listOptions.split(',').length > 1) {
+                                                $('#multiselectDivId'+result.split('|')[1]).parent().show(200)
+                                                listOptions.split(',').forEach(function(option){
+                                                    //console.log('option : ' + option);
+                                                    jsonOptions.push( { id: option, title : option, url: '' } );
+                                                });
+                                                $('#multiselectDivId'+result.split('|')[1]).html('<select id="'+result.split('|')[1]+'" onchange="setBrandVlues(this);" placeholder="Select a Brands..."></select>');
+                                                BrandsControl[result.split('|')[1]] = $('#'+result.split('|')[1]).selectize({
+                                                    maxItems: null,
+                                                    valueField: 'title',
+                                                    labelField: 'title',
+                                                    searchField: 'title',
+                                                    options: jsonOptions,
+                                                    create: false
+                                                });
+                                                BrandsControl[result.split('|')[1]][0].selectize.setValue(listSelected.split(';'));
+                                            } else {
+                                                $('#multiselectDivId'+result.split('|')[1]).parent().hide(200);
+                                            }
+                                            $('.background-block').fadeOut(200);                                                    
+                                        }, {
+                                            buffer: true,
+                                            escape: true,
+                                            timeout: 120000
+                                        }
+                                    );
+                                    
+                                    if($(FamilyBrandsObj).val() === 'Other') {
+                                        $(FamilyBrandsObj).parent().parent().next().find('input').addClass('firstImp').css('border-color','red').val('');
+                                    } else {
+                                        $(FamilyBrandsObj).parent().parent().next().find('input').removeClass('firstImp').css('border-color','').val('');
+                                    }
+                                } else {
+                                    $(FamilyBrandsObj).parent().parent().next().find('input').removeClass('firstImp').css('border-color','').val('');
+                                    $(FamilyBrandsObj).parent().next().hide(200);
+                                    
+                                    $(FamilyBrandsObj).parent().parent().parent().find(".Bcompact-btn").fadeOut(200);
+                                    //$(FamilyBrandsObj).parent().parent().next().hide(200);
+                                }
+                            }
+                            
+                            function setBrandVlues(selectizeObj) {
+                                if($(selectizeObj).val()) {
+                                    var brandsValues = $(selectizeObj).val().join().split(',').join(';');
+                                    setBrandsList($(selectizeObj).attr('id'),brandsValues);
+                                } else {
+                                    $(selectizeObj).parent().parent().parent().next().find('input').removeClass('firstImp');
+                                }
+                            }
+                            
+                            $(".Bcompact-btn").click(function(){
+                                
+                                if($(this).parent().parent().find( '[id*=BlegendTxt]' ).text().trim()) {                                              
+                                    if($(this).parent().prev().is(':visible')){
+                                        $(this).find('img').attr('src','{!URLFOR($Resource.UserSetupWizard, '/minus.png')}');
+                                        $(this).parent().parent().parent().parent().parent().find('.brandFiedset').css('padding','25px 35px');
+                                    } else {
+                                        $(this).find('img').attr('src','{!URLFOR($Resource.UserSetupWizard, '/plus.png')}');
+                                        if($(this).parent().prev().is(':visible'))
+                                            $(this).parent().parent().parent().parent().parent().find('.brandFiedset').css('padding','13px 35px');
+                                    }                                             
+                                    $(this).parent().parent().children().each(function(){
+                                        if(!($(this).is( '[id=BrButtonDivId]' ))){
+                                            $(this).toggle(200);
+                                        }
+                                    });
+                                }
+                                $(window).scrollTop($(window).height());
+                            });
+                            
+                            if(parseInt('{!Bcounter-1}') > 1) {
+                                if( $(".Bcompact-btn").parent().prev().is(':hidden'))
+                                    $(".Bcompact-btn").trigger('click');
+                            }
+                            
+                            function checkOtherBrandValue(ObradInputObj){
+                                if($(ObradInputObj).val().trim()){
+                                    $(ObradInputObj).parent().parent().find('.Bcompact-btn').fadeIn(200);
+                                    $(ObradInputObj).parent().parent().find( '[id*=BlegendTxt]' ).text($(ObradInputObj).val());
+                                    
+                                    $(ObradInputObj).css('border-color','');
+                                    $(ObradInputObj).parent().parent().find( '[id*=BlegendTxt]' ).prev().text('');
+                                } else {
+                                    if($(ObradInputObj).hasClass('firstImp')) {
+                                        $(ObradInputObj).css('border-color','red');                                                     
+                                    }
+                                    $(ObradInputObj).parent().parent().find('.Bcompact-btn').fadeOut(200);                                         
+                                }
+                            }                                         
+                            
+                            </script>
+                        </apex:outputPanel>                                
+                    </div>
+                    <div class="add-link">                                
+                        <a href="#" onclick="$('.background-block').show(); addBrand();"><span class="plusIcon">+</span>Add Brand</a>
+                    </div>
+                </div>
+                <!--Forth Step-->
+                <div id="forth-step" class="allsteps">
+                    
+                    <div class="step-header">
+                        <h1>A review of your recent employment history</h1>
+                        <p>Provide employment history details. Enter each one on a separate screen by clicking on “Add Employment History” until you are finished adding all your relevant employment history. Then click “Save” to complete your profile.</p>
+                    </div>
+                    <div id="jobExpContainerDivId">
+                        <apex:outputPanel id="jobExpOutPannelId">
+                            <apex:variable value="{!1}" var="JEcounter"/>
+                            <apex:repeat value="{!listJobExperiences}" var="jobExp">
+                                <fieldset class="brandFiedset" style="margin-top:30px;">
+                                    <legend>Recent Employee History {!JEcounter}</legend>
+                                    <div id="JEerrorDivId" style="color: red;"/>
+                                    <div id="JElegendTxt{!JEcounter}" style="display:none;"/>
+                                    <div id="buttonDivId" style="float:right; margin:-15px;">
+                                        <button type="button" class="JEcompact-btn">
+                                            <img src="{!URLFOR($Resource.UserSetupWizard, '/minus.png')}" alt="close" width="30px;" height="30px;"></img>
+                                    </button>
+                                    <button type="button" id="closeJEBtnId{!JEcounter}" onclick="$('.background-block').show();removeJobExp({!JEcounter});" class="close-btn" style="display:{!IF(JEcounter==1,'none','inline-block')};">
+                                        <img src="{!URLFOR($Resource.UserSetupWizard, '/closebtn.png')}" alt="close" width="30px;" height="30px;"></img>
+                                </button>
+                            </div>
+                            <div class="clear"></div>
+                            <div class="property-info">
+                                <div class="property-name">
+                                    <label class="pro-name">Hotel Property Name :</label>
+                                    <apex:inputField value="{!jobExp.Hotel_Property_Name__c}" styleClass="firstImp compactClass{!JEcounter}"
+                                                     onkeyup="if($(this).val().trim()){$(this).parent().parent().parent().find('.JEcompact-btn').fadeIn(200); } else {$(this).parent().parent().parent().find('.JEcompact-btn').fadeOut(200);}" 
+                                                     html-placeholder="Hotel Name" style="border-color:{!if(ISBLANK(jobExp.Hotel_Property_Name__c),'red','')};"/>
+                                </div>
+                                <div class="property-name">
+                                    <label class="pro-city">Property City :</label>
+                                    <apex:inputField value="{!jobExp.Property_City__c}" html-placeholder="City" styleClass="firstImp" style="border-color:{!if(ISBLANK(jobExp.Property_City__c),'red','')};"/>
+                                </div>
+                                <div class="state">
+                                    <label class="state-lable">State :</label>
+                                    <apex:inputField value="{!jobExp.Property_State__c}" styleClass="state-picklist firstImp" style="border-color:{!if(ISBLANK(jobExp.Property_State__c),'red','')};"/>                                                </div>
+                                <div class="job-title">
+                                    <div class="job-info">
+                                        <label class="job-title">Job Title :</label>
+                                        <apex:inputField value="{!jobExp.Job_Title__c}" html-placeholder="Title" styleClass="firstImp" style="border-color:{!if(ISBLANK(jobExp.Job_Title__c),'red','')};"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="step-header">
+                                <h1>Employment Dates</h1>
+                            </div>
+                            <div class="start-date">
+                                <div class="month-date">
+                                    <label class="month-list">Start Date Month :</label>
+                                    <apex:inputField value="{!jobExp.Start_Date_Month__c}" styleClass="month firstImp" style="border-color:{!if(ISBLANK(jobExp.Start_Date_Month__c),'red','')};"/>
+                                </div>
+                                <div class="year-date">
+                                    <label class="year-list">Start Date Year :</label>
+                                    <apex:inputField value="{!jobExp.Start_Date_Year__c}" styleClass="year firstImp" style="border-color:{!if(ISBLANK(jobExp.Start_Date_Year__c),'red','')};"/>
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+                            <div class="ending-date">
+                                <div class="end-month">
+                                    <label class="month-list">End Date Month :</label>
+                                    <apex:inputField value="{!jobExp.End_Date_Month__c}" styleClass="month"/>
+                                </div>
+                                <div class="end-year">
+                                    <label class="year-list">End Date Year :</label>
+                                    <apex:inputField value="{!jobExp.End_Date_Year__c}" styleClass="year"/>
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+                            <div class="working-status">
+                                <label class="status-label">Are You Still Working There?</label>
+                                <apex:inputField value="{!jobExp.Are_You_Still_Working_There__c}" styleClass="y-nstatus"/>
+                            </div>
+                            <div class="step-header">
+                                <h1>Hotel Property Details</h1>
+                            </div>
+                            <div class="Hotel-pro-details">
+                                <div class="property-details">
+                                    <label class="sleeping-rooms">Numbers of Sleeping Rooms :</label>
+                                    <apex:inputField value="{!jobExp.of_Sleeping_Rooms__c}"/>
+                                </div>
+                                <div class="property-details">
+                                    <label class="sleeping-rooms">SqFt of Meeting Space :</label>
+                                    <apex:inputField value="{!jobExp.SqFt_of_Meeting_Space__c}"/>
+                                </div>
+                                <div class="property-details">
+                                    <label class="sleeping-rooms">Numbers of Restaurant Seats :</label>
+                                    <apex:inputField value="{!jobExp.of_Restaurant_Seats__c}"/>
+                                </div>
+                            </div>
+                            <div class="step-header">
+                                <h1>Employment Details</h1>
+                            </div>
+                            <div class="footer-textarea">
+                                <label>Markets :</label>
+                                <apex:inputField value="{!jobExp.Markets__c}" html-placeholder="Markets"/>
+                                
+                                <div>
+                                    <label>Achievements 1 :</label>
+                                    <apex:inputField styleClass="firstImp" value="{!jobExp.Achievement_1__c}" html-placeholder="Provide an achievement for this job.." style="border-color:{!if(ISBLANK(jobExp.Achievement_1__c),'red','')};"/>
+                                </div>
+                                <div>
+                                    <label>Achievements 2 :</label>
+                                    <apex:inputField styleClass="firstImp" value="{!jobExp.Achievement_2__c}" html-placeholder="Provide an achievement for this job.." style="border-color:{!if(ISBLANK(jobExp.Achievement_2__c),'red','')};"/>
+                                </div>
+                                <label>Achievements 3 :</label>
+                                <apex:inputField value="{!jobExp.Achievement_3__c}" html-placeholder="Provide an achievement for this job.."/>
+                                
+                                <label>Achievements 4 :</label>
+                                <apex:inputField value="{!jobExp.Achievement_4__c}" html-placeholder="Provide an achievement for this job.."/>
+                                
+                                <label>Achievements 5 :</label>
+                                <apex:inputField value="{!jobExp.Achievement_5__c}" html-placeholder="Provide an achievement for this job.."/>
+                            </div>
+                        </fieldset>
+                        <apex:variable var="JEcounter" value="{!JEcounter+1}"/>
+                        <script type="text/javascript">
+                        if($('.compactClass{!JEcounter-1}').val()) {
+                            $('#JElegendTxt{!JEcounter-1}').text($('.compactClass{!JEcounter-1}').val()); 
+                        }
+                        else { $('#JElegendTxt{!JEcounter-1}').parent().find(".JEcompact-btn").hide(); }
+                        </script>
+                    </apex:repeat>
+                    <script type="text/javascript">
+                    $('.firstImp').change(function() {
+                        //console.log($(this).val());
+                        if ($(this).val().trim().length > 0) {
+                            $(this).css('border-color', '');
+                        } else {
+                            $(this).css('border-color', 'red');
+                        }
+                    });
+                    var HotelName;
+                    $(".JEcompact-btn").on('click',function(){
+                        HotelName = $(this).parent().parent().find( '[class*=compactClass]' ).val();
+                        if(HotelName){
+                            $(this).parent().prev().text(HotelName);
+                            $(this).parent().prev().prev().text('');
+                        }
+                        
+                        if($(this).parent().prev().is(':visible')){
+                            $(this).find('img').attr('src','{!URLFOR($Resource.UserSetupWizard, '/minus.png')}');
+                            if($(this).parent().prev().is(':visible'))
+                                $(this).parent().parent().parent().parent().find('.brandFiedset').css('padding','25px 35px');
+                        } else {
+                            $(this).find('img').attr('src','{!URLFOR($Resource.UserSetupWizard, '/plus.png')}');
+                            if($(this).parent().prev().is(':visible'))
+                                $(this).parent().parent().parent().parent().parent().find('.brandFiedset').css('padding','13px 35px');
+                        }
+                        
+                        $(this).parent().parent().children().each(function(){
+                            if(!($(this).is( '[id=buttonDivId]' ))){
+                                $(this).toggle(200);
+                            }
+                        });
+                        $(window).scrollTop(500,$(window).height());
+                    });
+                    
+                    $(".JEcompact-btn").each(function(){
+                        if(($(this).parent().parent().find( '[class*=compactClass]' ).val().trim())) {
+                            $(this).trigger('click');
+                        }
+                    });
+                    
+                    </script>
+                </apex:outputPanel>
+            </div>
+            <div class="add-link">
+                <a href="#" onclick="if($(this).attr('disabled')=='disabled'){ event.preventDefault();} else {$('.background-block').show(); addJobExp();}"><span class="plusIcon">+</span>Add Employment History</a>
+            </div>
+        </div>
+        <!--Fifth Step-->
+        <div id="fift-step" class="allsteps">
+            <div class="step-header">
+                <h1>Additional information</h1>
+            </div>
+            <div class="">
+                <label>Current Salary</label> 
+                <apex:inputField value="{!contactObj.Current_Salary__c}"/>
+            </div>
+            <div class="">
+                <label>Minimum Salary Requirement </label> 
+                <apex:inputField value="{!contactObj.Minimum_Salary_Requirement__c  }"/>
+            </div>
+            <div class="">
+                <label>Current Position Title  </label> 
+                <apex:inputField value="{!contactObj.Current_Position_Title__c}"/>
+            </div>
+            <div class="">
+                <label class="chk-label">
+                    <apex:inputField value="{!contactObj.Will_Relocate__c}"/>
+                    Will Relocate
+                </label>
+            </div>
+            <div class="">
+                <label class="chk-label" style="line-height:40px;">
+                    <apex:inputField value="{!contactObj.US_Citizen__c}"/>
+                    US Citizen
+                </label>
+            </div>
+            <label class="space-top" style="line-height:30px;">If not US Citizen enter the Country you are a citizen of below</label>
+            <div class="">
+                <label>Other Country Citizen </label> 
+                <apex:inputField value="{!contactObj.Other_Country_Citizen__c}"/>                                    
+            </div>
+        </div>
+        <!-- End Of Fift Step-->                    
+    </div>
+    
+    
+    <div class="btns-pre-next">
+        <div class="previous-action-button" >
+            <input id="prevBtnId" type="button" name="previous" class="action-button" value="PREVIOUS" disabled="disabled" onclick="handlePreviousButton();"/>
+        </div>
+        <div class="next-action-button">
+            <input id="saveBtnId" type="button" disabled="disabled" name="next" class="action-button" value="SAVE AND NEXT" onclick="handleSaveButton();" />
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+</div>
+<apex:inputField id="langId" value="{!contactObj.Languages__c}" style="display: none;"/>
+
+</apex:form>
+
+</body>
+<apex:includeScript value="{!$Resource.CustomScript}"/>
+<script type="text/javascript">
+var user = new RemoteSObject.getUser();
+
+var isclosePage = false;
+var languages = '{!contactObj.Languages__c}';
+var contId = '{!contactObj.Id}';
+console.log('contId==>',contId);
+var isNewUser = ('true' === '{!$User.isNewUser__c}');
+var insertedAttachmentList = new Array();
+var attchId ='';
+var attType ='';
+//console.log(isNewUser);
+var varBrand = '';
+var varJobExp = '';
+var deletedAttachId = '';
+
+function complateInsert(Languages, imageURL,currentStep) {
+    console.log('Languages :: ' + Languages);                
+    console.log('imageURL :: ' + imageURL);
+    console.log('currentStep ::'+currentStep);
+    user.update(
+        ['{!$User.Id}'],{
+            isNewUser__c : false
+        },function(err,userRecord){
+            if(err != null) {
+                console.log('Error : ' + err);
+            } else {
+                saveControllerData(Languages, imageURL,currentStep);
+            }
+        });
+}
+/* 
+             * @description Handles And update DOM element dynamicaly
+             */
+$(document).ready(function() {
+    if (contId) {
+        $('.add-link').show();
+    } else {
+        $('.add-link').hide();
+    }
+    
+    //if (!isNewUser) {
+    $('.resume-section').css('border', '1px solid lightgray');
+    $('.picture-section').css('border', '1px solid lightgray');
+    //}
+    resumeULhtml = $('.resume-section ul li').text();
+    profileULhtml = $('.picture-section ul li').text();
+    //console.log(Boolean(contId));
+    if(Boolean(contId)){
+        $('#saveBtnId').removeAttr('disabled');
+        $('#logoutBtn').removeAttr('disabled');     
+    }
+    
+    $('#Multi-step-form #step-bar li').on('click', function(e) {
+        var currentAttrValue = $(this).find('a').attr('href');
+        //console.log(currentAttrValue);
+        // Show/Hide Tabs
+        $('.allsteps').hide();
+        $(currentAttrValue).show();
+        
+        // Change/remove current tab to active
+        $('#Multi-step-form #step-bar li').removeClass('active');
+        $(this).addClass('active');
+        
+        if ($('#step-bar li:first-child').text() === $(this).text()) {
+            $('#prevBtnId').attr('disabled', 'disabled');
+        } else {
+            $('#prevBtnId').removeAttr('disabled');
+        }
+        if ($('#step-bar li:last-child').text() === $(this).text()) {
+            $('#saveBtnId').attr('value', 'SAVE');
+        } else {
+            $('#saveBtnId').attr('value', 'SAVE AND NEXT');
+        }
+        e.preventDefault();
+    });
+    
+    var jsonLanguages = [];
+    $('[id$=langId] option').each(function() {
+        jsonLanguages.push({
+            id: $(this).text(),
+            title: $(this).text(),
+            url: ''
+        });
+    });
+    //console.log('jsonLanguages : ' + JSON.stringify(jsonLanguages));
+    var langControl = $('#selectLanguagesId').selectize({
+        maxItems: null,
+        valueField: 'title',
+        labelField: 'title',
+        searchField: 'title',
+        options: jsonLanguages,
+        create: false
+    });
+    langControl[0].selectize.setValue(languages.split(';'));
+    
+    $('.emailClass').blur(function() {
+        var reg = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+        if (!reg.test($(this).val()) && $(this).val().trim().length >= 0) {
+            $(this).css('border-color', 'red');
+        } else {
+            $(this).css('border-color', '');
+        }
+    });
+    
+    $('.profileInId').on('change', function() {
+        if ($(this).val()) {
+            myfile = $(this).val();
+            var ext = myfile.split('.').pop();
+            if (ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "png") {
+                resumeUploaded = true;
+                readURL(this);
+            }
+        }
+    });
+    
+    $('.resumeInId').on('change', function() {
+        if ($(this).val()) {
+            resumeUploaded = false;
+            readURL(this);
+            /*myfile = $(this).val();
+                        var ext = myfile.split('.').pop();
+                        if (ext == "pdf" || ext == "docx" || ext == "doc" || ext == "doc") {
+                            resumeUploaded = false;
+                            readURL(this);
+                        }*/
+                    }
+                });
+                
+                $('.firstImp').change(function() {
+                    //console.log($(this).val());
+                    if ($(this).val().trim().length > 0) {
+                        $(this).css('border-color', '');
+                    } else {
+                        $(this).css('border-color', 'red');
+                    }
+                });
+                window.uploadAttachment = function uploadAttachment(fileId, filetype, attCounter, isDelete) {
+                    console.log('In uploadAttachment()');
+                    var attachmentBody = "";
+                    // Set isBigFile variable to true if their is big size file
+                    var isBigFile = ( attfileSize[attCounter] <= chunkSize ) ? false : true;
+                    console.log('isBigFile::',isBigFile);                    
+                    if (attfileSize[attCounter] <= positionIndex[attCounter] + chunkSize) {
+                        console.log('1.attCounter::::',attCounter);
+                        console.log('1.attachment[attCounter]:::',attachment[attCounter]);
+                        
+                        // Form attchment body
+                        attachmentBody = attachment[attCounter].substring(positionIndex[attCounter]);
+                        // If file uploading is done make it to true
+                        doneUploading[attCounter] = true;
+                    } 
+                    else {
+                        console.log('2.attCounter::::',attCounter);
+                        console.log('2.attachment[attCounter]:::',attachment[attCounter]);
+                         // Form attchment body 
+                        attachmentBody = attachment[attCounter].substring(positionIndex[attCounter], positionIndex[attCounter] + chunkSize);
+                        
+                        console.log('positionIndex[attCounter]==>'+positionIndex[attCounter]);
+                        console.log('attfileSize[attCounter] ::: '+attfileSize[attCounter]);
+                        console.log('attachmentBody.length:::'+attachmentBody.length);
+                    }
+                    console.log("Uploading " + attachmentBody.length + " chars of " + attfileSize[attCounter]);
+                    
+                    // Call remoting methed doUploadAttachment to UPSERT the attachments.
+                    CH_UserSetupPageController.doUploadAttachment(
+                        contId, attachmentBody, attachmentName, fileId, filetype, attCounter, isBigFile, isDelete,  
+                        function(result, event) {
+                            
+                            console.log('result : ' + result);
+                            // If result is not equals to NULL then get result values
+                            if(result != null){
+                                // Getting image URL
+                                if (!(result.split('|')[1] === null)) {
+                                    imageURL = result.split('|')[1];
+                                }
+                                // Getting attachment Id, file type, attachment name by splitting result
+                                if (!(result.split('|')[0] === null)) {
+                                    // Getting attachment Id 
+                                    attchId = result.split('|')[0];
+                                    // Getting attachment file type
+                                    attType = result.split('|')[3];
+                                    // Getting attachment name
+                                    attachmentName = result.split('|')[4];
+                                    // Getting deleted attachment Id
+                                    deletedAttachId = result.split('|')[5];
+                                    
+                                    console.log( 'deletedAttachId: ', deletedAttachId );
+                                    
+                                    // Remove deleted attachments from insertedAttachmentList
+                                    for (var i = 0; i < insertedAttachmentList.length; i++) {
+                                        var obj = insertedAttachmentList[i];
+                                        console.log( 'obj: ', obj, 'obj.attachment', obj.attachment,  );
+                                        if ( obj.attachment == deletedAttachId ) {
+                                            insertedAttachmentList.splice(i, 1);
+                                        }
+                                    }
+                                        
+                                    // check if attchment is already added in insertedAttachmentList or not
+                                    var isAddedAttch = insertedAttachmentList.find(obj => obj.attachment == attchId);
+                                    console.log('isAddedAttch:::',isAddedAttch);
+                                    
+                                    // Add attachment in insertedAttachmentList If its not added alreday.
+                                    if( typeof isAddedAttch == 'undefined'){
+                                        insertedAttachmentList.push(
+                                            {
+                                                attachment: attchId,
+                                                type: attType,
+                                                name: attachmentName  
+                                            }
+                                        );
+                                    }
+                                    console.log('insertedAttachmentList::',insertedAttachmentList);
+                                }
+                            }
+                            // If their is any exception show it
+                            if (event.type === 'exception') {
+                                console.log("exception");
+                                console.log(event);
+                            } else if (event.status) { 
+                                // IF status is SUCCESS 
+                                if(isclosePage) {
+                                    if (doneUploading[0] && doneUploading[1]) {
+                                        var Languages = '';
+                                        if (($('#selectLanguagesId').val())) {
+                                            Languages = ($('#selectLanguagesId').val()).join().split(',').join(';');
+                                        }
+                                        // Hide all other steps excepts current step
+                                        $('.allsteps').hide();
+                                        $('.background-block').fadeOut(200);
+                                        
+                                        $('#uploadMsgDivId').html('<span style="color:green;">Attachments Uploaded Successfully..!!</span>').show(500).delay(5000).queue(function(){
+                                                complateInsert(Languages, imageURL, '');
+                                        });
+                                        
+                                        console.log('isclosePage::',isclosePage);
+                                        // Hide Loader after successfull insertion of attachments
+                                        $('.background-block').hide();
+                                        // Show third step after successfull insertion of attachments
+                                        $('#third-step').show();
+                                    }
+                                } else {
+                                    if (doneUploading[0] || doneUploading[1]) {
+                                        var Languages = '';
+                                        if (($('#selectLanguagesId').val())) {
+                                            Languages = ($('#selectLanguagesId').val()).join().split(',').join(';');
+                                        }
+                                        // Hide all other steps excepts current step
+                                        $('.allsteps').hide();
+                                        $('.background-block').fadeOut(200);
+
+                                        $('#uploadMsgDivId').html('<span style="color:green;">Attachments Uploaded Successfully..!!</span>').show(500).delay(5000).queue(function(){
+                                                complateInsert(Languages, imageURL,'');
+                                        });
+                                        
+                                        console.log('isclosePage::',isclosePage);
+                                        // Hide Loader after successfull insertion of attachments
+                                        $('.background-block').hide();
+                                        // Show third step after successfull insertion of attachments
+                                        $('#third-step').show();
+                                    }
+                                }
+                                // If File is not Uploaded then add chunksize
+                                if (doneUploading[attCounter] == false) {
+                                    //console.log(event.message);
+                                    positionIndex[attCounter] += chunkSize;
+                                    // Upload attachments in chunks
+                                    uploadAttachment(result.split('|')[0], attType, result.split('|')[2], false);
+                                }
+                            }
+                        }, {
+                            buffer: true,
+                            escape: true,
+                            timeout: 120000
+                        }
+                    );
+                } 
+                $('.background-block').fadeOut(200);
+            });
+/////////// TABLE ///////////
+function initializeReflowView(){
+    var nameArray = new Array();
+    var allTh = $("table.multiSelectPicklistTable th");
+    $.each(allTh, function(index, thNode) {
+        nameArray[index] = $(thNode).text();
+    });
+    var allRows = $("table.multiSelectPicklistTable tbody tr");
+    $.each(allRows, function(index, trNode) {
+        var tdArray = $(trNode).find("td");
+        $.each(tdArray, function(index, tdNode) {
+            $(tdNode).prepend('<div class="tableHeadSpan">'+nameArray[index]+'</div>');
+        });
+    });
+}
+</script>
+
+<apex:outputPanel id="custom-script">
+    <script type="text/javscript">
+    // rediects to community landing url
+    function redirectToCommunityLandingURL(){
+        console.log('redirectToCommunityLandingURL');
+        var lastStep = '{! isLastStep}';
+        console.log('isLastStep==>',lastStep);
+        
+        if({! isLastStep}){
+            var communityLandingURL = '{!communityLandingURL}';
+            console.log('communityLandingURL==>',communityLandingURL);
+            window.top.location.href = communityLandingURL;
+        }
+    }
+    
+    </script>
+</apex:outputPanel>
+
+</apex:page>

@@ -1,0 +1,40 @@
+<apex:page showHeader="false" controller="JopOpeningAlertResponseController" standardStylesheets="false" 
+sidebar="false" applyBodyTag="false" docType="html-5.0">    
+    <head>
+        <title>Carver Hotel Group</title>   
+         <script src="{!URLFOR($Resource.jQueryFiles, 'js/jquery-2.2.1.min.js')}"/>             
+         <style>
+         .notificationDiv{background: #1f97d5; width: 30%; padding: 20px;margin-top: 150px; border: 0 none;border-radius: 6px;}
+         .responseMsg{color: white;font-size: 19px;font-family: 'Montserrat', sans-serif;font-weight: 500;}
+         </style>
+    </head>
+    <body width="100%">
+         <center>
+             <div id="notificationDivId" class="notificationDiv" style="display:none;">
+                <p id="notificationMsg" class="responseMsg">Thank you for submiting your response.</p>                    
+            </div>  
+         </center>
+    </body>
+
+    <script>
+        var $j = jQuery.noConflict(); 
+        $j(document).ready(function() {
+            console.log('ready');
+            var eligibleConsultantId = "{!JSENCODE($CurrentPage.parameters.Id)}";
+            var response = "{!JSENCODE($CurrentPage.parameters.reply)}";
+            console.log('ready' + eligibleConsultantId + response );
+            
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.JopOpeningAlertResponseController.updateEligibleConsultant}',
+                eligibleConsultantId,
+                response,
+                function(result, event) {
+                    if (event.status) {
+                        console.log('Eligible Consultant updated sucessfully.');
+                        $j("#notificationDivId").show();
+                    }
+                }
+            );
+        });
+    </script>        
+</apex:page>

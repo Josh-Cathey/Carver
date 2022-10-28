@@ -1,0 +1,93 @@
+<apex:page title="Calendar" standardController="Contact" standardStylesheets="false" sidebar="false" doctype="html-5.0">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">           
+        <apex:remoteObjects >
+            <apex:remoteObjectModel id="consultantBookedDateRemoteId" name="Opportunity" jsShorthand="getConsultantBookedDates" 
+            fields="Id,Name,Service_Start_Date__c,Service_End_Date__c,Consultant_Assigned__c,Account_Name__c"/>
+            <apex:remoteObjectModel id="consultantBloakOutDateRemoteId" name="Consultant_Block_Out_Dates__c" jsShorthand="getConsultantBlockOutDates" 
+            fields="Id,Name,Consultant_Contact__c,Not_Available_End_Date__c,Not_Available_Start_Date__c,Not_Available_Details__c"/>
+        </apex:remoteObjects>       
+        
+        
+        <apex:stylesheet value="https://fonts.googleapis.com/css?family=Montserrat:400,700"/>
+        <apex:stylesheet value="{!URLFOR($Resource.CalenderUI, '/fullcalendar.css')}"/>
+        <!-- Included Lightning Design System CSS And Scripts -->
+        <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+        
+        <c:CalendarCSS /> 
+        
+        <apex:includeScript value="{!URLFOR($Resource.CalenderUI,'/lib/jquery.min.js')}"/>
+        <apex:includeScript value="{!URLFOR($Resource.CalenderUI,'/lib/moment.min.js')}"/>
+        <apex:includeScript value="{!URLFOR($Resource.CalenderUI,'/fullcalendar.min.js')}"/>
+        
+        <div class="container">
+            <div id="calendar" class="slds-container--small"></div>
+        </div>
+        
+        <div class="slds">            
+            <div id="bcdForm">
+                <div id="formBackground" class="modalBg">
+                    <div class="modal">
+                        <div class="modalHeader">New Consultant Block Out-Dates
+                            <a href="javascript:void(0);" class="modalClose">&#10006;</a>
+                        </div>
+                        <div id="formBody" class="modalBody">           
+                            <div class="slds-form--horizontal">
+                                <!-- <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label" for="consultant">Consultant Contact</label>
+                                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                            <svg aria-hidden="true" class="slds-input__icon">
+                                                <use xlink:href="{!URLFOR($Resource.SLDS0122, '/assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                                            </svg>
+                                            <input id="consultant" class="slds-input" type="text" aria-autocomplete="list" role="combobox" aria-expanded="true" aria-activedescendant="" />
+                                            <input id="consultant-hidden" type="hidden"/>
+                                        </div>
+                                    </div>
+                                     <c:Book_Consultant_Lookup htmlLookupId="consultant"></c:Book_Consultant_Lookup> 
+                                </div> -->
+                                <input id="consultantId-hidden" type="hidden"/>
+                                    
+                                <div class="slds-form-element" style="margin-top:8px;">
+                                    <label class="slds-form-element__label" for="notAvailableStartDate">Not Available Start Date</label>
+                                    <div class="slds-form-element__control">
+                                        <input id="notAvailableStartDate" class="slds-input" type="date" placeholder="Week Of" />
+                                    </div>
+                                </div>
+                                <div class="slds-form-element" style="margin-top:8px;">
+                                    <label class="slds-form-element__label" for="notAvailableEndDate">Not Available End Date</label>
+                                    <div class="slds-form-element__control">
+                                        <input id="notAvailableEndDate" class="slds-input" type="date" placeholder="Week Of" />
+                                    </div>
+                                </div>
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="notAvailableDetails">Not Available Details</label>
+                                    <div class="slds-form-element__control">
+                                        <textarea id="notAvailableDetails" class="slds-textarea"></textarea>
+                                    </div>
+                                </div>
+                            </div>  
+                        </div>
+                        <div class="modalFooter">
+                            <button id="saveBtn" class="btn btnBlue" style="color:white;">Save</button>
+                            <a id="cancelBtn" href="#" class="btn btnDefault">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+            <!-- Toast Message Container -->
+            <div id="toast" class="slds-notify-container" style="margin-top:2em;"> 
+                 <div class="slds-grid slds-wrap" align="center">                             
+                    <div class="slds-col" > 
+                        <div id="toastGrid" class="slds-grid slds-wrap slds-grid--vertical slds-grid--align-center">                            
+                        </div>
+                    </div>                            
+                </div> 
+            </div>
+            <!-- / Toast Message Container -->  
+        </div> 
+        <c:CalendarJS contactRecordTypeName="{!Contact.RecordType.Name}" ></c:CalendarJS>    
+        <script>
+            console.log('{!Contact.RecordType.Name}');
+        </script>
+    </html>
+</apex:page>

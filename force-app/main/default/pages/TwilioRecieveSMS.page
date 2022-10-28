@@ -1,0 +1,6 @@
+<apex:page controller="TwilioRecieveSMSController" sidebar="false" 
+  showheader="false"
+  contentType="text/xml" action="{!init}">{! '<?xml version=\"1.0\" encoding=\"UTF-8\"?>' }
+ {!twiml} 
+ 
+</apex:page>

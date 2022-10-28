@@ -1,0 +1,62 @@
+/**
+ * Created by Holden.Parker on 1/17/22.
+ * @ small break point value, center and add padding around upload inputs
+ */
+
+:host {
+    --slds-c-input-color-border: lightgray;
+    --slds-c-textarea-color-border: lightgray;
+    --slds-c-checkbox-color-border: lightgray;
+    --lwc-colorBorderInput: lightgray;
+    --lwc-colorBorder: lightgray;
+    --slds-c-card-body-spacing-block-start: 0;
+    --slds-c-card-header-spacing-block-end: 0;
+}
+
+@media screen and (min-width: 64em) {
+    .contentPadding {
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+}
+
+.uploadInputMargin {
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+}
+
+@media screen and (max-width: 30em) {
+    .uploadInputPadding {
+        padding-bottom: .75rem;
+    }
+}
+
+@media screen and (min-width: 48em) {
+    .otherBrandMobile {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 48em) {
+    .otherBrandDesktop {
+        display: none;
+    }
+    .desktopOnly {
+        display: none;
+    }
+}
+
+.header {
+    background-color: #1f97d5;
+    color: white;
+}
+
+.lightgrayBorder {
+    border: 1px solid lightgray
+}
+
+.greenText {
+    color: green;
+    text-align: center;
+}

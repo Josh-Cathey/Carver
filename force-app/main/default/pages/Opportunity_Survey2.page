@@ -1,0 +1,169 @@
+<apex:page showHeader="false" controller="OpportunitySurvey2Controller" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+    <html
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+            <title>Carver Hotel Group Survey</title>
+            <!-- Included Lightning Design System CSS -->
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <!-- Included Lightning Design System CSS -->
+            <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+            <script src="{!URLFOR($Resource.jQueryFiles, 'js/jquery-2.2.1.min.js')}"/>
+            <!-- <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'/> -->
+            <style>
+                //html, body .slds{font-family: 'Montserrat', sans-serif;color: #122e37;}//font-size: 12px;    
+                body {background-color: #f8fbfc;} 
+                .notificationDiv{background: #1f97d5; width: 30%; padding: 20px;margin-top: 150px; border: 0 none;border-radius: 6px;}
+                .surveyMsg{color: white;font-size: 19px;font-family: 'Montserrat', sans-serif;font-weight: 500;}
+                .slds .slds-button {color: #1f97d5;}
+                .slds .slds-button--brand {background-color: #1f97d5;color:white;}
+                .slds .slds-button:hover, .slds .slds-button:focus {background-color:white;color:#1f97d5;}
+                .slds .slds-button--brand:hover, .slds .slds-button--brand:focus {background-color: #1f97d5;color: white;}  
+                .instructions{font-size: 12px;color: #1f97d5;margin-top: 0.5em;margin-bottom: 0.5em;font-weight:bold;}           
+            </style>
+        </head>
+        <body width="100%">
+            <center>
+                <div class="slds" id="surveyDivId">
+                    <div class="myapp" style="margin-left: 8px;margin-right: 8px;">
+                        <fieldset class="slds-box slds-theme--default slds-container--small" style="text-align:left;">
+                            <legend id="newaccountform" class="slds-text-heading--medium slds-p-vertical--medium" style="margin-bottom:-25px;color: #1f97d5;font-weight:bold;">
+                                &nbsp;Carver Hotel Consultant Survey&nbsp;
+                            </legend>
+                            <div class="instructions">
+                                *Please answer all the questions with 0  being the lowest score and 5 being the highest.
+                            </div>
+                            <div class="slds-grid--vertical">
+                                <div class="slds-form-element slds-m-top--small slds-m-horizontal--xx-small  is-required">
+                                    <label class="slds-form-element__label">Did your Task Force Consultant achieve set goals?</label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select consultantRating">
+                                                <apex:repeat value="{!consultantRatingpicklistValues}" var="consultantRating">
+                                                    <option value="{!consultantRating.value}" label="{!consultantRating.label}" />
+                                                </apex:repeat>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form-element slds-m-top--small slds-m-horizontal--xx-small  is-required">
+                                    <label class="slds-form-element__label">Were they dressed appropriately and presented in a professional manner?</label>
+                                    <div class="slds-form-element__control">
+                                         <div class="slds-select_container">
+                                             <select class="slds-select professionalMannerRating">
+                                                  <apex:repeat value="{!dressedProfessionalMannerPicklistValues}" var="professionalMannerRating">
+                                                    <option value="{!professionalMannerRating.value}" label="{!professionalMannerRating.label}" />
+                                                </apex:repeat>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form-element slds-m-top--small slds-m-horizontal--xx-small  is-required">
+                                    <label class="slds-form-element__label" for="lName">Did they interact well with other hotel team members and guests?</label>
+                                    <div class="slds-form-element__control">
+                                         <div class="slds-select_container">
+                                            <select class="slds-select hotelMembersRatings">
+                                                <apex:repeat value="{!interactwellHotelMembersAndGuestsPicklistValues}" var="hotelMembersRatings">
+                                                    <option value="{!hotelMembersRatings.value}" label="{!hotelMembersRatings.label}" />
+                                                </apex:repeat>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form-element slds-m-top--small slds-m-horizontal--xx-small  is-required">
+                                    <label class="slds-form-element__label">Did you find their skill set appropriate for the assignment?</label>
+                                    <div class="slds-form-element__control">
+                                         <div class="slds-select_container">
+                                            <select class="slds-select skillSetRatings">
+                                                <apex:repeat value="{!skillSetAppropriateForAssignmentPicklistValues}" var="skillSetRatings">
+                                                    <option value="{!skillSetRatings.value}" label="{!skillSetRatings.label}" />
+                                                </apex:repeat>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form-element slds-m-top--small slds-m-horizontal--xx-small  is-required">
+                                    <label class="slds-form-element__label">If you had the same need, would you ask for the same consultant?</label>
+                                    <div class="slds-form-element__control">
+                                         <div class="slds-select_container">
+                                            <select class="slds-select ifNeedSameConsultantRating">
+                                              <apex:repeat value="{!ifSameNeedAskForSameConsultantPicklistValues}" var="ifNeedSameConsultantRating">
+                                                    <option value="{!ifNeedSameConsultantRating.value}" label="{!ifNeedSameConsultantRating.label}" />
+                                                </apex:repeat>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid--align-center slds-wrap slds-m-top--medium">
+                                    <input type="button" id="submitbtnId" class="slds-col--padded slds-size--3-of-7 slds-medium-size--1-of-4 slds-large-size--3-of-12 slds-button slds-button--brand slds-m-top--small slds-m-horizontal--x-small" style="min-width:100px;" onclick="submitOpportunitySurvey()" value="Submit" />
+                                    <input type="button" id="cancelbtnId" class="slds-col--padded slds-size--3-of-7 slds-medium-size--1-of-4 slds-large-size--3-of-12 slds-button slds-button--neutral slds-m-top--small slds-m-horizontal--x-small" style="min-width:100px;"  onclick="$j('#cancelDiv').show();$j('#surveyDivId').hide();" value="Cancel" />
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div id="notificationDivId" class="slds-hide notificationDiv" style="display:none;">
+                      <p id="notificationMsg" class="surveyMsg">Thank you for completing survey.</p>                    
+                </div> 
+                 <div id="cancelDiv" class="slds-hide notificationDiv" style="display:none;">
+                      <p class="surveyMsg">Carver Hotel Survey Cancel.</p>                    
+                </div>   
+                   <!--error msgpanel-->
+                            <!---div class="slds slds-theme--shade">                
+                            <div id="notificationPopup" class="slds-hide">
+                                <div aria-hidden="false" role="dialog" class="slds-modal slds-fade-in-open">
+                                    <div id="cancleFormYesNo" class="slds-container--center slds-container--small slds-modal__container">
+                                        <div class="slds-modal__header slds-hide">
+                                            <h2 class="slds-text-heading--medium">Modal Header</h2>
+                                            <button class="slds-button slds-button--icon-inverse slds-modal__close">
+                                            <svg aria-hidden="true" class="slds-button__icon slds-button__icon--large">
+                                                <use xlink:href="{!URLFOR($Resource.SLDS0122, '/assets/icons/action-sprite/svg/symbols.svg#close')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Close</span>
+                                            </button>
+                                        </div>
+                                            <div class="slds-modal__content" style="text-align:center;">
+                                            <div>
+                                                <p id="notificationMsg">Carver Hotel Survey Completed.</p>                    
+                                            </div>                                
+                                        </div>
+                                        <div class="slds-modal__footer">
+                                            <div class="slds-x-small-buttons--horizontal slds-grid slds-grid--align-space">
+                                              <button id="okBtn" class="slds-col slds-button slds-button--neutral slds-button--brand" 
+                                              onclick="$j('#notificationPopup').hide()">OK</button>
+                                        </div>
+                                    </div>
+                                </div>        
+                            </div> 
+                            <div class="slds-backdrop slds-backdrop--open"></div>
+                            </div> 
+                            </div>--->
+                            <!--error msgpanel-->
+            </center>
+        </body>
+        <!-- JAVASCRIPT -->
+        <script>
+           var $j = jQuery.noConflict(); 
+            function submitOpportunitySurvey(){
+              var opportunityId = "{!JSENCODE($CurrentPage.parameters.Id)}";
+              console.log('opportunityId'+opportunityId);
+                 Visualforce.remoting.Manager.invokeAction(
+                  '{!$RemoteAction.OpportunitySurvey2Controller.updateOpportunity}',
+                   opportunityId,
+                   $j("select.consultantRating option:selected").val(),
+                   $j("select.professionalMannerRating option:selected").val(),
+                   $j("select.hotelMembersRatings option:selected").val(),
+                   $j("select.skillSetRatings option:selected").val(),
+                   $j("select.ifNeedSameConsultantRating option:selected").val(),
+                   function(result, event) {
+                      if (event.status) {
+                        $j("#notificationDivId").show();
+                        $j("#surveyDivId").hide();
+                        console.log('Opportunity update successfully');
+                      }
+                 });
+            }
+        </script>
+        <!-- JAVASCRIPT -->
+    </html>
+</apex:page>

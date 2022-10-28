@@ -1,0 +1,47 @@
+<apex:page showHeader="false" controller="OpportunitySurvey1Controller" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+     <html
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+            <title>Carver Hotel Group Survey</title>
+            <!-- Included Lightning Design System CSS -->
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <!-- Included Lightning Design System CSS -->
+            <apex:stylesheet value="{!URLFOR($Resource.SLDS0122, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+             <script src="{!URLFOR($Resource.jQueryFiles, 'js/jquery-2.2.1.min.js')}"/>
+             <style>
+             .notificationDiv{background: #1f97d5; width: 30%; padding: 20px;margin-top: 150px; border: 0 none;border-radius: 6px;}
+             .surveyMsg{color: white;font-size: 19px;font-family: 'Montserrat', sans-serif;font-weight: 500;}
+             </style>
+        </head>
+        <body width="100%">
+             <center>
+                 <div id="notificationDivId" class="slds-hide notificationDiv" style="display:none;">
+                    <p id="notificationMsg" class="surveyMsg">Thank you for completing survey.</p>                    
+                </div>  
+             </center>
+        </body>
+
+        <script>
+            var $j = jQuery.noConflict(); 
+            $j(document).ready(function() {
+                console.log('ready');
+                var opportunityId = "{!JSENCODE($CurrentPage.parameters.Id)}";
+                var survey1Reply = "{!JSENCODE($CurrentPage.parameters.reply)}";
+                console.log('ready'+opportunityId+survey1Reply);
+                 Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.OpportunitySurvey1Controller.updateOpportunity}',
+                    opportunityId,
+                    survey1Reply,
+                    function(result, event) {
+                        if (event.status) {
+                            console.log('Opportunity updated suuucessfully.');
+                            $j("#notificationDivId").show();
+                        }
+                    }
+                );
+            });
+        </script>
+
+        </html>
+</apex:page>

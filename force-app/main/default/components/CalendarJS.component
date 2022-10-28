@@ -1,0 +1,217 @@
+<apex:component controller="CalendarController">
+    <apex:attribute name="contactRecordTypeName" description="This is the value for the component." type="String" required="true"/>
+    <script>
+        $j = jQuery.noConflict();
+        var consultantId;
+        $j(document).ready(function() {
+            $j("#bcdForm").hide();
+            consultantId = '{!$CurrentPage.parameters.id}';    
+            // console.log('consultantId  : ' + consultantId); 
+            if(consultantId === undefined || consultantId === ''){
+                alert('Record Id in URL parameter missing.');
+            }else{
+                getConsultantBookedDates();
+            }
+            $j(".fc-widget-content").attr("id","weekCol");
+        });
+        $j("#cancelBtn").click(function() {
+            $j("#notAvailableStartDate").val("");
+            $j("#notAvailableEndDate").val("");
+            $j("#notAvailableDetails").val("");
+            
+            $j('#bcdForm').hide();
+            $j('#calendar').show();
+        });
+        $j(".modalClose").click(function() {
+            $j("#notAvailableStartDate").val("");
+            $j("#notAvailableEndDate").val("");
+            $j("#notAvailableDetails").val("");
+            
+            $j('#bcdForm').hide();
+            $j('#calendar').show();
+        });
+        
+        $j("div").click(function(event) {
+            // console.log(event.target.id);
+            if (event.target.id === 'formBackground') {
+                $j('#bcdForm').hide();
+                $j('#calendar').show();
+            }
+        });
+        
+        function getConsultantBookedDates() {
+            var consultantBookedDates = new SObjectModel.getConsultantBookedDates();
+            var bookedDateArray = new Array();
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.CalendarController.getConsultantDates}',
+            consultantId,
+            function(result, event) { // Callout Function
+                if (event.status) {
+                    // console.log(JSON.stringify(result[0]));
+                    var d, date, mm, yy;
+                    var event, startDate, endDate;
+                    //console.log(result[0].get('Service_Start_Date__c'));                   
+                    for (var i = 0; i < (result.length); i++) {
+                        //console.log('result[i].start ::: ' + result[i].start);
+                        d = new Date(result[i].start);
+                        d.setMonth(d.getMonth() + parseInt(1));
+                        date = d.getDate();
+                        mm = d.getMonth();
+                        yy = d.getFullYear();
+                        //startDate = moment((yy + '-' + mm + '-' + date), 'YYYY-MM-DD');
+                        startDate = result[i].start;
+                        //console.log('startDate  : ' + (yy + '-' + mm + '-' + date));
+
+                        //console.log('result[i].endDate ::: ' + result[i].endDate);
+                        d = new Date(result[i].endDate);
+                        d.setDate(d.getDate() + parseInt(1));
+                        d.setMonth(d.getMonth() + parseInt(1));
+                        date = d.getDate();
+                        mm = d.getMonth();
+                        yy = d.getFullYear();
+                        //endDate = moment((yy + '-' + mm + '-' + date), 'YYYY-MM-DD');
+                        endDate = result[i].endDate;
+                        //console.log('endDate : ' + (yy + '-' + mm + '-' + date));
+
+                        if(result[i].title === 'Consultant Not Available'){
+                            event = {
+                                title: result[i].title,
+                                start: startDate,
+                                end: endDate,
+                                allDay: true,
+                                backgroundColor: 'red'
+                            };
+                        }
+                        else{
+                            event = {
+                                title: result[i].title,
+                                start: startDate,
+                                end: endDate,
+                                allDay: true
+                            };                       
+                        }
+                        //console.log(JSON.stringify(event));
+                        bookedDateArray.push(event);
+                        // console.log('bookedDateArray : ' + JSON.stringify(bookedDateArray));                      
+                    }
+                } else if (event.type === 'exception') {
+                    //document.getElementById("responseErrors").innerHTML = 
+                    //  event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                    alert(event.message);
+                    displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                } else {
+                    //document.getElementById("responseErrors").innerHTML = event.message;
+                    displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                }                
+                //getConsultantBlockOutDates(bookedDateArray);
+                generateCalender(bookedDateArray);
+            }, 
+            {escape: true});
+        }
+        
+        function generateCalender(bookedDateArray) {
+            //console.log('generateCalender bookedDateArray : ' + JSON.stringify(bookedDateArray)); 
+            $j('#calendar').fullCalendar({
+                header: {
+                    left: 'month,agendaWeek',
+                    center: 'title',
+                    right: ' today prev,next'
+                },
+                editable: false,
+                events: bookedDateArray,
+                forceEventDuration: true,
+                allDay: true,
+                allDayText: 'All Day',
+                defaultAllDayEventDuration: {
+                    days: 1
+                },
+                views: {
+                    // options apply to agendaWeek and agendaDay views
+                    agenda: {
+                        eventLimit: false, // allow "more" link when too many events
+                    },
+                    // options apply to basicDay and agendaDay views
+                    month: {
+                        eventLimit: false, // allow "more" link when too many events
+                    }
+                },
+                dayClick: function(date, jsEvent, view) {
+                    // console.log('contactRecordTypeName : ' + '{!contactRecordTypeName}')
+                    if('{!contactRecordTypeName}' === 'Consultants'){
+                        bookConsultant(date, jsEvent, view);
+                    }
+                },
+                height: 'auto'
+            });
+        }
+        
+        function bookConsultant(date, jsEvent, view) {
+            //alert(date.format());     
+            $j("#notAvailableStartDate").val(date.format());
+            // $j("#consultant").val(date.format());  
+            $j("#consultantId-hidden").val(consultantId);
+            $j("#bcdForm").show();
+        }       
+        
+        $j("#saveBtn").click(function() {
+            var startDate = $j("#notAvailableStartDate").val();
+            var endDate = $j("#notAvailableEndDate").val();
+            if ((startDate !== undefined && startDate !== '') && (endDate !== undefined && endDate !== '') && (startDate.trim() !== '' && endDate.trim() !== '')) {
+                if (startDate > endDate) {
+                    //alert("Not Available Start Date should be less than Not Available End Date");
+                    displayMsg('startDateValidationError' + Math.floor((Math.random() * 100) + 1), 'Not Available Start Date should be less than Not Available End Date', 'error');
+                    $j("#notAvailableStartDate").focus();
+                } else {
+                    createConsultantBlockOutDate(startDate, endDate);
+                }
+            } else {
+                //alert("Start Date and End Date are required fields.");
+                displayMsg('requiredFieldError' + Math.floor((Math.random() * 100) + 1), 'Start Date and End Date are required fields.', 'error');
+            }
+        });
+        
+        function createConsultantBlockOutDate(startDate, endDate) {
+            var blockOutDetails = $j("#notAvailableDetails").val();
+            
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.CalendarController.createConsultantBlockOutDates}', 
+            consultantId,startDate,endDate,blockOutDetails, 
+            function(result, event) { // Callout Function
+                // console.log(result);
+                if(result.search('Error-') == 0){
+                    //alert(result.split('-')[1]);
+                    displayMsg('InsertErr' + Math.floor((Math.random() * 100) + 1), result.split('-')[1], 'error');
+                }                
+                else if (event.status) {
+                    // console.log(JSON.stringify(result[0]));
+                    displayMsg('blockoutDateSuccess' + Math.floor((Math.random() * 100) + 1), result, 'success');
+                    setTimeout(function() {
+                        $j(".modal").hide();
+                        $j(".modalHeader").hide();
+                        $j(".modalBody").hide();
+                        $j(".modalFooter").hide();
+                        location.reload();
+                    }, 4000);
+                } else if (event.type === 'exception') {
+                    //document.getElementById("responseErrors").innerHTML = 
+                    //  event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                    //alert(event.message);
+                    displayMsg('blockoutDateErr' + Math.floor((Math.random() * 100) + 1), JSON.stringify(event.message).replace(/"/g, ''), 'error');
+                    $j('#notAvailableStartDate').focus();
+                } else {
+                    //document.getElementById('responseErrors').innerHTML = event.message;
+                    displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                }
+            }, {
+                escape: true
+            }); 
+        }
+        
+        function displayMsg(id,alertMsg, type) {
+             var $alertDiv = $j("<div id=\'"+id+"\' class='slds-col'><div class='slds-notify slds-notify--toast slds-theme--" + type + " ' role='alert' style='max-width:350px;min-width:350px' ><span class='slds-assistive-text'>Info</span><div class='notify__content'><table><tr><td style='width:10%;'><span class='slds-icon'><img class='slds-icon slds-icon--small' src=\"{!URLFOR($Resource.SLDS0122, '/assets/icons/utility/" + type + "_60.png')}\" alt='Alert' /><span class='slds-assistive-text'>My Pack</span></span></td><td style='padding-left:2px;'><h2 id='alertMsg' class='slds-text-heading--small' >" + alertMsg + "</h2></td><td style='width:10%;'><button class='slds-button slds-notify__close' onClick='$j(this).parent().parent().parent().parent().parent().parent().fadeOut(500);'><img class='slds-button__icon slds-button__icon--inverse' src=\"{!URLFOR($Resource.SLDS0122, '/assets/icons/action/close_60.png')}\" alt='Close' /><span class='slds-assistive-text'>Close</span></button></td></tr></table></div></div></div>");
+             $j("#toastGrid").append($alertDiv);
+             $j('#'+id).fadeIn(500).delay(3000).fadeOut(500,function(){$j('#toastGrid #'+id).remove()});   
+        }  
+
+    </script>
+</apex:component>

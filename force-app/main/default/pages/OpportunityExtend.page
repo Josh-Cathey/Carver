@@ -1,0 +1,42 @@
+<apex:page sidebar="false" showHeader="false" standardController="Opportunity" >
+    <apex:includeScript value="/soap/ajax/43.0/connection.js" />
+    <apex:includeScript value="/soap/ajax/43.0/apex.js"/> 
+    
+    <script> 
+    
+        function processData(){ 
+            var sessionId = '{!$Api.Session_ID}';
+            sforce.connection.sessionId = '{!$Api.Session_ID}';
+            var opportunityId = '{!Opportunity.Id}';  
+            
+            var result = sforce.apex.execute("OpportunityHelper", "cloneOpportunity",{opportunityId : opportunityId}); 
+            
+            var res = result.toString(); 
+            var varResult = res.substring(0,10); 
+            
+            if(varResult == 'successful'){ 
+                alert('{!Opportunity.Name} has been cloned successfully.'); 
+                
+                if( isLightningExperienceOrSalesforce1() ) {
+                    //Lightning Experience
+                    sforce.one.navigateToSObject(res.substring(10,28)); 
+                }
+                else {
+                    //Classic Visualforce
+                    window.location.href = '/'+ res.substring(10,28); 
+                }
+                
+            }else{ 
+                alert(result); 
+            } 
+        }
+        
+        processData();
+        
+        function isLightningExperienceOrSalesforce1() {
+            return((typeof sforce != 'undefined') && sforce && (!!sforce.one));
+        }
+    
+    </script>
+    
+</apex:page>

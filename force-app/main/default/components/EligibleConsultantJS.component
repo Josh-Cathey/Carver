@@ -1,0 +1,553 @@
+<apex:component controller="EligibleConsultantController">
+        <apex:attribute name="eligibleConsultant" description="This is the value for the component." type="EligibleConsultantWrapper[]" required="true"/>
+        <apex:attribute name="eligibleConsultantJSON" description="This is the value for the component." type="String" required="true"/>
+        <apex:attribute name="opp" description="This is the value for the component." type="Opportunity" required="true"/>
+        
+        <!-- JAVASCRIPT -->        
+        <script>    
+            $j = jQuery.noConflict();
+            var device;
+            var table;
+            $j(document).ready(function() {
+                //console.log('{!opp.Consultant_Assigned__c}' );
+                //console.log('{!opp.StageName}' );
+                
+               /* if('{!opp.StageName}' == 'Closed Lost' || '{!opp.Consultant_Assigned__c}' != '' || '{!opp.StageName}' == 'Closed Won'){
+                    $j("body").hide();
+                }
+                else*/ if ('{!$CurrentPage.parameters.id}' == '') {
+                    //displayMsg('noRecordErr'+Math.floor((Math.random() * 100) + 1),'No such Record-ID found.', 'error');
+                    $j("#popupBackground").hide();
+                    $j("#popupAlertMsg").text('No such Record-ID found.');
+                    $j("#popupAlertMsg").css("color", "red");
+                    $j("#popupMsgDiv").show();
+                } else {
+                    var userAgent = navigator.userAgent.toLowerCase();
+                    if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) device = 'iphoneORipad';
+                    else if (userAgent.indexOf('android') > -1) device = 'android';
+                    else device = 'PC';
+                    $j("#popupBackground").hide();
+                    $j("#popupMsgDiv").hide();
+                    searchEligibleConsultant();
+                }
+                $j('#example').on('click', 'tbody tr', function() {
+                    //var table = $j('#example').dataTable();
+                    // Check if any rows are selected
+                    if (table.row(this, {
+                            selected: true
+                        }).any()) {
+                        // if condition here, if not valid
+                        /*if ($j(this).children().children().is(':checked') == false){
+                            //table.row(this).deselect();
+                            $j(this).children().children().removeProp('checked');
+                        }else*/
+                        if ($j(this).children().children().is('span')) {
+                            table.row(this).deselect();
+                        }
+                        /*else{
+                                                        $j(this).children().children().prop('checked');
+                                                    }*/
+                        if ($j(this).children().children().hasClass("rowSelect") == false) {
+                            table.row(this).deselect();
+                        }
+                    }
+                    $j('tbody tr').each(function() {
+                        if ($j(this).hasClass('selected')) {
+                            $j(this).children().children().filter('.rowSelect').prop('checked', true).trigger("change");
+                        } else {
+                            $j(this).children().children().filter('.rowSelect').prop('checked', false).trigger("change");
+                        }
+                    });
+                });
+                // Handle click on "Select all" control
+                $j('#example-select-all').on('change', function() {
+                    // Check/uncheck all checkboxes in the table
+                    var rows = table.rows({
+                        'search': 'applied'
+                    }).nodes();
+                    $j('.rowSelect', rows).prop('checked', this.checked);
+                    //console.log('select all : ' + $j(this).prop('checked'));
+                    if ($j(this).prop('checked')) {
+                        $j('.rowSelect').each(function() {
+                            $j(this).parent().parent().addClass('selected');
+                        });
+                        //table.rows({'class': 'rowSelect'}).select(); 
+                    } else {
+                        $j('.rowSelect').each(function() {
+                            $j(this).parent().parent().removeClass('selected');
+                        });
+                        //table.rows({'class': 'rowSelect'}).deselect(); 
+                    }
+                });
+                $j('.rowSelect').on('change', function() {
+                    var isAllRowSelected = checkAllRowSelected();
+                    //console.log('isAllRowSelected : ' + isAllRowSelected);
+                    $j('#example-select-all').prop('checked', isAllRowSelected);
+                    //console.log('$j(this).prop(checked) : ' + $j(this).is(':checked'));                    
+                    if ($j(this).is(':checked')) {
+                        $j(this).parent().parent().addClass('selected');
+                    } else {
+                        $j(this).parent().parent().removeClass('selected');
+                    }
+                });
+            
+                function checkAllRowSelected() {
+                    var isAllRowSelected = false;
+                    $j('.rowSelect').each(function(index) {
+                        //console.log( index + ": " + $j(this).prop('checked'));
+                        if ($j(this).is(':checked')) {
+                            isAllSelected = true;
+                        } else {
+                            isAllSelected = false;
+                            return false;
+                        }
+                    });
+                    //console.log('isAllSelected : ' + isAllSelected);
+                    if (isAllSelected == true) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                $j("#closeBtn").click(function() {
+                    $j("#popupMsgDiv").hide();
+                    //console.log($j("#popupAlertMsg").css("color"));
+                    if ($j("#popupAlertMsg").css("color") == "rgb(0, 128, 0)") {
+                        /*String url = '/apex/EligibleConsultant?id={!$CurrentPage.parameters.id}';
+                        console.log('url::',url);*/
+                        //window.location = '{!$Page.EligibleConsultant}?id={!$CurrentPage.parameters.id}';
+                        window.open('{!$Page.EligibleConsultant}?id={!$CurrentPage.parameters.id}', '_blank');
+                        //sforce.one.navigateToSObject('{!$CurrentPage.parameters.id}');
+                    }
+                });
+            });
+            
+            function searchEligibleConsultant() {
+                var dataSet = [];
+                dataSet = createDataset();
+                //console.log('dataSet.length ::: ' + dataSet.length);
+                //console.log('dataSet ::: ' + JSON.stringify(dataSet));
+                initDatatable(dataSet);
+            }
+            
+            function createDataset() {
+              
+                var eligibleConsultants = ('{!eligibleConsultantJSON}');
+                //console.log("eligibleConsultants ::: " + eligibleConsultants);
+                //console.log("eligibleConsultants ::: " + eligibleConsultants.toString().replace(/\*/g, "'"));
+
+                var data;
+                var dataSet = [];
+                if (eligibleConsultants != '' && eligibleConsultants != undefined) {
+                    //var obj = JSON.parse(eligibleConsultants.toString().replace(/\*/g, "'"));
+                    var obj = JSON.parse(eligibleConsultants);
+                    //console.log("obj ::: " + JSON.stringify(obj));
+                    //console.log("obj ::: " + obj[0].get("CI_TY"));
+                    //console.log("obj ::: " + obj[0].CI_TY);
+                    
+                    for (var i = 0; i < obj.length; i++) {
+                        //console.log("obj[i].consultantRating ::: " + obj[i].consultantRating);  
+                        if(obj[i].consultantRating){
+                            obj[i].consultantRating = obj[i].consultantRating;
+                            //console.log("obj[i].consultantRating ::: " + obj[i].consultantRating);
+                        }
+                    }
+                    //console.log("obj ::: " + JSON.stringify(obj));
+                    for (var i = 0; i < obj.length; i++) {
+                        data = [];
+                        data.push('');
+                        data.push(obj[i].name);                
+                        
+                        if(obj[i].interested !== undefined && obj[i].interested !== '-'){
+                            data.push(obj[i].interested);
+                        }else{
+                            data.push('-');
+                        }
+
+                        if(obj[i].status !== undefined && obj[i].status !== '-'){
+                            data.push(obj[i].status);
+                        }else{
+                            data.push('-');
+                        }
+                        //console.log('obj[i].interested : ' + obj[i].interested);
+                        //console.log('obj[i].status : ' + obj[i].status);
+                                                   
+                        data.push(obj[i].CI_TY);
+                        data.push(obj[i].delphi);
+                        data.push(obj[i].envision);
+                        data.push(obj[i].ISAC);
+                        data.push(obj[i].salesPro);                   
+                         var imgURL = obj[i].consultantRating;
+                        //console.log('imgURL : ' + imgURL);
+                        data.push(imgURL);
+                        data.push(obj[i].recordId);                   
+                        data.push(obj[i].averageSurveyGrade==undefined?'Z':obj[i].averageSurveyGrade);
+                        //console.log('obj[i].Eligible_Consultants__r : ' + obj[i].Eligible_Consultants__r);
+                        //console.log('obj[i].Eligible_Consultants__r : ' + obj[i].Eligible_Consultants__r.records.length);
+                        /*if (obj[i].Eligible_Consultants__r != undefined && obj[i].Eligible_Consultants__r.records != undefined && obj[i].Eligible_Consultants__r.records.length > 0) {
+                            console.log('obj[i].Eligible_Consultants__r.status : ' + obj[i].Eligible_Consultants__r.records[0].status);
+                            if(obj[i].Eligible_Consultants__r.records[0].status !== undefined){
+                                data.push(obj[i].Eligible_Consultants__r.records[0].status);
+                            }else{
+                                data.push('Eligible');
+                            }
+                        } else {
+                            data.push('');
+                        }*/
+                        //console.log("data ::: " + data);
+                        dataSet.push(data);
+                    } 
+                }
+                return dataSet;
+            }
+
+            function initDatatable(dataSet) {
+                if (dataSet.length > 0) {
+                    //console.log("dataSet ::: " + dataSet);
+                    table = $j('#example').DataTable({
+                        'dom': 'lfrtipB',
+                        'data': dataSet,
+                        'responsive': true,
+                        'select': 'multi',
+                        'pageLength': -1,
+                        'lengthMenu': [
+                            [1, 5, 10, 25, 50, -1],
+                            [1, 5, 10, 25, 50, "All"]
+                        ],
+                        'oTableTools': {
+                            'sRowSelect': 'multi'
+                        },                        
+                        'drawCallback': function( settings ) {
+                            var api = new $j.fn.dataTable.Api( settings );
+                            var order = api.order() ;
+                           //console.log('order : '  + order[0][0] );
+
+                            if(order[0][0] == 11 || order[0][0] == 9){
+                                //console.log('a settings : ' + (settings[0]));
+                                $j("#rating").addClass("sorting_" + sortOrder);
+                                if(sortOrder == 'asc')
+                                    $j("#rating").attr("aria-sort","ascending");
+                                else
+                                    $j("#rating").attr("aria-sort","descending");
+                                //console.log('a currentSortOrder : ' + sortOrder); 
+                            }else{
+                                $j("#rating").addClass("sorting_1");
+                                $j("#rating").removeClass("sorting_" + sortOrder);
+                                
+                                if(sortOrder == 'asc')
+                                    $j("#rating").removeAttr("aria-sort","ascending");
+                                else
+                                    $j("#rating").removeAttr("aria-sort","descending");
+
+                                sortOrder = undefined;
+                                //console.log('a currentSortOrder : ' + sortOrder); 
+                            }
+
+                            // Output the data for the visible rows to the browser's console
+                            // You might do something more useful with it!
+                            //console.log( api.rows( {page:'current'} ).data() );
+                        },
+                        'createdRow': function(row, data, dataIndex) {
+                            //console.log('dataIndex ::: ' + dataIndex);                                
+                            //console.log('$j(row) ::: ' + JSON.stringify($j(row).find('input[type="checkbox"]').prop('checked', true)));
+                            //console.log('$j(row) ::: ' + JSON.stringify(data));
+                            //console.log('$j(row) ::: ' + JSON.stringify(dataIndex));
+                            $j(row).find('.rowCITY').prop('checked', data[4]);
+                            $j(row).find('.rowDelphi').prop('checked', data[5] == true ? true : false);
+                            $j(row).find('.rowEnvision').prop('checked', data[6] == true ? true : false);
+                            $j(row).find('.rowISAC').prop('checked', data[7] == true ? true : false);
+                            $j(row).find('.rowSalesPro').prop('checked', data[8] == true ? true : false);
+                            $j(row).find('.interested').addClass('dt-body-center');
+                            $j(row).find('.status').addClass(data[3] != '-' ? 'dt-body-left':'dt-body-center');
+                            //$j(row).find('.rating').parent().attr('data-order', data[1]);
+                            //data[9] = data[9].replace(/"/g, "'");
+                            //console.log('data[9] : ' + data[9].replace(/"/g, "'"));
+                            //$j(row).find('input[type="checkbox"]').addClass('rowSelect'); 
+                        },
+                        'columnDefs': [{
+                            'targets': 0,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                //console.log('data ::: ' + JSON.stringify(data));
+                                //console.log('type ::: ' + JSON.stringify(type));
+                                //console.log('full ::: ' + JSON.stringify(full));
+                                //console.log('meta ::: ' + meta);
+                                //console.log('full[3] ::: ' + full[3]);
+                                
+                                if (full[3] == 'Rejected' || full[3] == 'ConsultantTurnedDown') {
+                                    return '<span style="color:red;font-size: 12px;font-weight: 600;">&#x2718;</span>';
+                                } else if (full[3] === 'Selected') {
+                                    return '<span style="color:green;font-size: 12px;font-weight: 600;">&#x2714;</span>';
+                                } else if (full[3] === 'Eligible') {
+                                    return '<input type="checkbox" checked="true" onclick="return false;" id="' + full[10] + '">';
+                                } else {
+                                    return '<input type="checkbox" class="rowSelect" id="' + full[10] + '">';
+                                }
+                            }
+                        },
+                        {
+                            'targets': 1,
+                            'searchable': true,
+                            'orderable': true,
+                            'className': 'dt-body-left',
+                            'render': function(data, type, full, meta) {
+                                //console.log('device : ' + device);
+                                if (device === 'PC') {
+                                    return '<a style="text-decoration:none;color:#000;" target="_self" href="/' + full[10] + '">' + full[1] + '</a>';
+                                } else {
+                                    
+                                    var consultantNavUrl = sforce.one.navigateToSObject('\'' + full[10] + '\'');
+                                    console.log('consultantNavUrl::',consultantNavUrl);
+                                    //var consultantNavUrl = '/' + full[10];
+                                    //return '<a style="text-decoration:none;color:#000;" target="_blank" href="javascript:' + consultantNavUrl + '">' + full[1] + '</a>';
+                                    return '<a style="text-decoration:none;color:#000;" target="_self" href="/' + consultantNavUrl + '">' + full[1] + '</a>';
+                                }
+                            }
+                        },
+                        {
+                            'targets': 2,
+                            'className': 'interested'                          
+                        },
+                        {
+                            'targets': 3,
+                            'className': 'status'
+                        }, {
+                            'targets': 4,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                return '<input type="checkbox" class="rowCITY" onclick="return false;" ' + (full[4] == true ? 'checked' : '') + '>';
+                            }
+                        }, {
+                            'targets': 5,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                return '<input type="checkbox" class="rowDelphi" onclick="return false;" ' + (full[5] == true ? 'checked' : '') + '>';
+                            }
+                        }, {
+                            'targets': 6,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                return '<input type="checkbox" class="rowEnvision" onclick="return false;" ' + (full[6] == true ? 'checked' : '') + '>';
+                            }
+                        }, {
+                            'targets': 7,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                return '<input type="checkbox" class="rowISAC" onclick="return false;" ' + (full[7] == true ? 'checked' : '') + '>';
+                            }
+                        }, {
+                            'targets': 8,
+                            'searchable': false,
+                            'orderable': false,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                return '<input type="checkbox" class="rowSalesPro" onclick="return false;" ' + (full[8] == true ? 'checked' : '') + '>';
+                            }
+                        }, {
+                            'targets': 9,
+                            'searchable': false,
+                            'orderable': true,
+                            'className': 'dt-body-center',
+                            'render': function(data, type, full, meta) {
+                                //console.log('full[9] : ' + full[9]);
+                                //console.log('type : ' + type);
+                                //console.log('full[11] : ' + full[11]);
+                                /*return '<img src="' + full[11] + '" alt="Rating" border="0"><input type="hidden" value="' + full[9] + '"></input></img>';*/                                
+                                return '<img src="' + full[9] + '" alt="Rating" border="0"></img>';                            
+                            }
+                        },
+                        {
+                            'targets': 10,
+                            'visible': false                          
+                        },
+                        {
+                            'targets': 11,
+                            'visible': false                           
+                        }],
+                        'order': [11, 'asc'],
+                        'buttons': [{
+                            text: 'Send SMS',
+                            action: function(e, dt, node, config) {
+                                // alert( 'Button activated' );
+                                saveBtnClick(e, dt, node, config);
+                            }
+                        }]
+                    });
+                    table.order( [ 11, toggleSortOrder()]).draw(true);
+                    $j('#btnDiv').append(table.buttons().container());  
+
+                    //table.order.listener( '#rating', 11);                     
+                } else {
+                    $j("#noEligibleConsultant").css("display", "block");
+                    $j("#listConsultant").css("display", "none");
+                    $j(".container").css("display", "none");
+                }
+
+            }
+
+            var sortOrder;
+            function toggleSortOrder(){
+                if(sortOrder == undefined){
+                    sortOrder = 'asc';
+                    return sortOrder;
+                }
+                if(sortOrder == 'asc'){
+                    sortOrder = 'desc';                    
+                    return 'desc';                    
+                }else{
+                    sortOrder = 'asc';
+                    return 'asc';
+                }
+            }
+            $j("#rating").click(function(){
+                //console.log('b currentSortOrder : ' + sortOrder); 
+                table.order( [ 11, toggleSortOrder() ]).draw(false);  
+                //table.order.listener( '#rating', 11);
+            });
+            
+            function saveBtnClick(e, dt, node, config) {
+                //console.log('e ::: ' + e);
+                //console.log('dt ::: ' + dt);
+                //console.log('node ::: ' + JSON.stringify(node));
+                //console.log('config ::: ' + JSON.stringify(config));                     
+                createEligibleConsultant();
+            }
+            
+            function createEligibleConsultant() {
+                var eligibleConsultantIds = [];
+                //console.log( table.rows('.selected').data().length +' row(s) selected' );    
+                eligibleConsultantIds = getSelectedConsultantIds();
+                $j("#popupAlertMsg").text('');
+                //console.log('eligibleConsultantIds ::: ' + JSON.stringify(eligibleConsultantIds));
+                if (eligibleConsultantIds.length > 0) {
+                    
+                    Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.EligibleConsultantController.createEligibleConsultants}', eligibleConsultantIds, '{!$CurrentPage.parameters.id}', function(result, event) { // Callout Function
+                        if (event.status) {
+                            //alert(result);
+                            console.log("result : " + result);
+                            //console.log("result.toLowerCase() : " + result.toLowerCase());
+                            //console.log("result.indexOf('error') : " + result.search("error"));
+                            //console.log("result.indexOf('error') : " + (result.toLowerCase().search("error") != -1));
+                            if (result.toLowerCase().search("error") == -1) {
+                                // $j("#popupAlertMsg").text(result);
+                                // $j("#popupAlertMsg").css("color","green");
+                                sendSMS(eligibleConsultantIds,result);
+                            } else {
+                                $j("#popupBackground").hide();
+                                $j("#popupAlertMsg").text((result!= undefined && result.indexOf('Consultant Not Available')!=-1)?'Consultant Not Available':result);
+                                $j("#popupAlertMsg").css("color", "red");
+                            }
+                            //$j("#popupAlertMsg").text(result);  
+                            $j("#popupMsgDiv").show();
+                        } else if (event.type === 'exception') {
+                            //document.getElementById("responseErrors").innerHTML = 
+                            //  event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                            $j("#popupBackground").hide();
+                            $j("#popupAlertMsg").text((event.message!= undefined && event.message.indexOf('Consultant Not Available')!=-1)?'Consultant Not Available':event.message);
+                            $j("#popupAlertMsg").css("color", "red");
+                            $j("#popupMsgDiv").show();
+                            //alert(event.message);
+                            //displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                        } else {
+                            $j("#popupBackground").hide();
+                            $j("#popupAlertMsg").text(event.message);
+                            $j("#popupAlertMsg").css("color", "red");
+                            $j("#popupMsgDiv").show();
+                            //alert(event.message);
+                            //document.getElementById("responseErrors").innerHTML = event.message;
+                            //displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                        }
+                    }, {
+                        escape: true
+                    });
+                } else {
+                    $j("#popupBackground").hide();
+                    $j("#popupAlertMsg").text('No Eligible Consultant record selected.');
+                    $j("#popupAlertMsg").css("color", "red");
+                    $j("#popupMsgDiv").show();
+                }
+            }
+            
+            function sendSMS(eligibleConsultantIds, setEligibleConsultantIds) {
+                $j("#popupBackground").show();
+                $j("#popupAlertMsg").text('');
+                //console.log(JSON.stringify(eligibleConsultantIds));
+                //console.log('{!opp} ::: ' + '{!opp}');
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.EligibleConsultantController.sendSMS}', 
+                eligibleConsultantIds, 
+                '{!$CurrentPage.parameters.id}',
+                setEligibleConsultantIds,
+                function(result, event) { // Callout Function
+                    if (event.status) {
+                        //alert(result);
+                        $j("#popupBackground").hide();
+                        //console.log("result : " + result);
+                        //console.log("result.toLowerCase() : " + result.toLowerCase());
+                        //console.log("result.indexOf('error') : " + result.search("error"));
+                        //console.log("result.indexOf('error') : " + (result.toLowerCase().search("error") != -1));
+                        if (result != undefined && result.toLowerCase().search("error") == -1) {
+                            $j("#popupAlertMsg").text(result);
+                            $j("#popupAlertMsg").css("color", "green");
+                        } 
+                        else if(result != undefined && result.search('Error - Script-thrown exception') != -1){
+                            $j("#popupAlertMsg").text('SMS Sending Failed.');
+                            $j("#popupAlertMsg").css("color", "red");
+                        }
+                        else{
+                            $j("#popupAlertMsg").text(result);
+                            $j("#popupAlertMsg").css("color", "red");
+                        }
+                        
+                        //$j("#popupAlertMsg").text(result);  
+                        $j("#popupMsgDiv").show();
+                    } else if (event.type === 'exception') {
+                        //document.getElementById("responseErrors").innerHTML = 
+                        //  event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                        $j("#popupBackground").hide();
+                        if(event.message != undefined && event.message.search('Error - Script-thrown exception') != -1){
+                            $j("#popupAlertMsg").text('SMS Sending Failed.');                            
+                        }else{
+                            $j("#popupAlertMsg").text(event.message);                            
+                        }
+                        $j("#popupAlertMsg").css("color", "red");
+                        $j("#popupMsgDiv").show();
+                        //alert(event.message);
+                        //displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                    } else {
+                        $j("#popupBackground").hide();
+                        $j("#popupAlertMsg").text(event.message);
+                        $j("#popupAlertMsg").css("color", "red");
+                        $j("#popupMsgDiv").show();
+                        //alert(event.message);
+                        //document.getElementById("responseErrors").innerHTML = event.message;
+                        //displayMsg('FDErr' + Math.floor((Math.random() * 100) + 1), event.message, 'error');
+                    }
+                }, {
+                    escape: true
+                });
+            }
+            
+            function getSelectedConsultantIds() {
+                var eligibleConsultantIds = [];
+                $j.each(table.rows('.selected').data(), function() {
+                    //console.log('data ::: ' + this[7]);
+                    eligibleConsultantIds.push(this[10]);
+                });
+                //console.log('eligibleConsultantIds::',eligibleConsultantIds);
+                return eligibleConsultantIds;
+            }
+
+
+        </script>
+        <!-- JAVASCRIPT -->   
+    </apex:component>

@@ -1,0 +1,1084 @@
+<!--
+ - Created by Holden.Parker on 1/17/22.
+ -->
+
+<template>
+    <article class="slds-card slds-is-relative" style="border: 0;">
+        <div class="slds-size_1-of-1 slds-p-around_medium header">
+            <div class="slds-align_absolute-center slds-size_1-of-1 slds-wrap">
+                <h1 class="slds-size_1-of-1 slds-text-align_center slds-card__header-title" style="display: block;">
+                    Welcome to the Carver Companies Community
+                </h1>
+                <div class="slds-size_1-of-1 slds-m-around_large slds-text-align_center">
+                    <p>
+                        In order to get started as a community member we must first gather details regarding your
+                        background so that we can develop a profile.
+                    </p>
+                    <p>
+                        The more complete the profile, the more consultant assignments for which you will be eligible
+                        and/or the more permanent placements that you will qualify for.
+                    </p>
+                </div>
+            </div>
+            <div class="slds-size_1-of-1 slds-p-around_large">
+                <a onclick={handleProgressClick} data-step={currentStep}>
+                    <lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+                        <template for:each={steps} for:item="step">
+                            <lightning-progress-step
+                                    label={step.label}
+                                    value={step.value}
+                                    key={step.label}
+                                    data-step={step.value}
+                            ></lightning-progress-step>
+                        </template>
+                    </lightning-progress-indicator>
+                </a>
+                <div class="slds-grid slds-wrap slds-p-top_x-small slds-align_absolute-center desktopOnly" style="max-width: 86%;">
+                    <template for:each={steps} for:item="step">
+                        <div key={step.label} class="slds-size_1-of-5 slds-text-align_center">
+                            <p>{step.label}</p>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+        </div>
+        <div if:true={_isLoading}>
+            <lightning-spinner
+                    variant="brand"
+                    size="large"
+                    style="z-index: 50"
+                    alternative-text="Loading..."
+            ></lightning-spinner>
+        </div>
+        <div class="slds-size_1-of-1">
+            <!-- Your General Background BEGIN -->
+            <template if:true={isStep1}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small slds-size_1-of-1">
+                    <div class="contentPadding">
+                        <h1 class="slds-card__header-title">Your General Background</h1>
+                        <div class="slds-p-vertical_small">
+                            <p>
+                                Please begin here with your General Background Information. It is recommended you
+                                complete all the inputs in the same session so please give yourself 30 minutes to
+                                complete.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contentPadding">
+                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="First Name:"
+                                        variant="label-stacked"
+                                        name="FirstName"
+                                        value={_contact.FirstName}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Last Name:"
+                                        variant="label-stacked"
+                                        name="LastName"
+                                        value={_contact.LastName}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Legal Name:"
+                                        variant="label-stacked"
+                                        name="Legal_Name__c"
+                                        value={_contact.Legal_Name__c}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Email Address:"
+                                        variant="label-stacked"
+                                        type="email"
+                                        name="Email"
+                                        value={_contact.Email}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Phone Number:"
+                                        variant="label-stacked"
+                                        type="tel"
+                                        name="Phone"
+                                        value={_contact.Phone}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                        </div>
+                        <div class="slds-size_1-of-1">
+                            <lightning-textarea
+                                    label="Address Details"
+                                    variant="label-stacked"
+                                    name="MailingStreet"
+                                    value={_contact.MailingStreet}
+                                    onchange={handleStep1FormChange}
+                                    required
+                                    class="step1"
+                            ></lightning-textarea>
+                        </div>
+                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                            <div class="slds-size_1-of-1 slds-small-size_4-of-12 slds-medium-size_5-of-12">
+                                <lightning-input
+                                        label="City:"
+                                        variant="label-stacked"
+                                        name="MailingCity"
+                                        value={_contact.MailingCity}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_4-of-12 slds-medium-size_5-of-12">
+                                <lightning-input
+                                        label="State:"
+                                        variant="label-stacked"
+                                        name="MailingState"
+                                        value={_contact.MailingState}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-2 slds-small-size_4-of-12 slds-medium-size_2-of-12">
+                                <lightning-input
+                                        label="Zip Code:"
+                                        variant="label-stacked"
+                                        name="MailingPostalCode"
+                                        value={_contact.MailingPostalCode}
+                                        onchange={handleStep1FormChange}
+                                        required
+                                        class="step1"
+                                ></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <!-- Your General Background END -->
+
+            <!-- Profile Picture & Resume BEGIN -->
+            <template if:true={isStep2}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small slds-size_1-of-1">
+                    <div class="contentPadding">
+                        <h1 class="slds-card__header-title">Profile Picture & Resume</h1>
+                        <div class="slds-p-vertical_small">
+                            <p>
+                                Attach Resume, upload Profile Picture and answer additional work related skills and
+                                technical experience.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contentPadding">
+                        <div class="slds-size_1-of-1 slds-grid slds-wrap slds-m-bottom_small">
+                            <div class="uploadInputPadding slds-size_1-of-1 slds-small-size_1-of-2">
+                                <div if:true={_resumeMessage} class="slds-size_1-of-1 greenText uploadInputMargin">
+                                    {_resumeMessage}
+                                </div>
+                                <lightning-file-upload
+                                        class="slds-size_1-of-1 uploadInputMargin"
+                                        label="Upload Resume"
+                                        name="resumeUploader"
+                                        accept={resumeFormats}
+                                        record-id={recordId}
+                                        onuploadfinished={handleResumeUploadFinished}
+                                >
+                                </lightning-file-upload>
+                            </div>
+                            <div class="uploadInputPadding slds-size_1-of-1 slds-small-size_1-of-2">
+                                <div if:true={_profilePicMessage} class="slds-size_1-of-1 greenText uploadInputMargin">
+                                    {_profilePicMessage}
+                                </div>
+                                <lightning-file-upload
+                                        class="slds-size_1-of-1 uploadInputMargin"
+                                        label="Upload Profile Picture"
+                                        name="profilePicUploader"
+                                        accept={profilePicFormats}
+                                        onuploadfinished={handleProfilePicUploadFinished}
+                                >
+                                </lightning-file-upload>
+                            </div>
+                        </div>
+
+                        <!-- Skills Technical Experience Section -->
+                        <div class="slds-size_1-of-1">
+                            <h1 class="slds-card__header-title">Skills Technical Experience Section</h1>
+                        </div>
+                        <!-- Automated Systems Group  /servlet/servlet.FileDownload?file=00P5d00001UtVVMEA3 -->
+                        <article class="slds-card slds-size_1-of-1 lightgrayBorder">
+                            <div class="slds-card__header slds-size_1-of-1">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-link slds-truncate">
+                                            <span>Automated Systems:</span>
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-6">
+                                        <lightning-input
+                                                name="CI_TY__c"
+                                                type="checkbox"
+                                                label="CI/TY"
+                                                checked={_contact.CI_TY__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-6">
+                                        <lightning-input
+                                                name="Delphi__c"
+                                                type="checkbox"
+                                                label="Delphi"
+                                                checked={_contact.Delphi__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-6">
+                                        <lightning-input
+                                                name="Envision__c"
+                                                type="checkbox"
+                                                label="Envision"
+                                                checked={_contact.Envision__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-6">
+                                        <lightning-input
+                                                name="ISAC__c"
+                                                type="checkbox"
+                                                label="ISAC"
+                                                checked={_contact.ISAC__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-6">
+                                        <lightning-input
+                                                name="SalesPro__c"
+                                                type="checkbox"
+                                                label="SalesPro"
+                                                checked={_contact.SalesPro__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                        <lightning-input
+                                                name="CI_TY_EID__c"
+                                                label="CI/TY EID #"
+                                                variant="label-stacked"
+                                                value={_contact.CI_TY_EID__c}
+                                                class="step2"
+                                                onchange={handleStep2FormChange}
+                                                required={_contact.CI_TY__c}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                        <lightning-input
+                                                name="CI_TY_Date_Certified__c"
+                                                label="CI/TY Date Certified"
+                                                variant="label-stacked"
+                                                type="date"
+                                                value={_contact.CI_TY_Date_Certified__c}
+                                                class="step2"
+                                                onchange={handleStep2FormChange}
+                                                required={_contact.CI_TY__c}></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                        <lightning-combobox
+                                                name="Delphi_Standard_or_FDC__c"
+                                                label="Delphi Standard or FDC"
+                                                variant="label-stacked"
+                                                value={_contact.Delphi_Standard_or_FDC__c}
+                                                class="slds-p-horizontal_xx-small slds-p-bottom_x-small step2"
+                                                options={delphiStandardOptions.data}
+                                                onchange={handleStep2FormChange}
+                                                disabled={isDelphiDisabled}
+                                                required={_contact.Delphi__c}
+                                        ></lightning-combobox>
+                                    </div>
+                                    <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                        <lightning-input
+                                                name="Other_Automated_Sytems__c"
+                                                label="Other Automated Systems:"
+                                                variant="label-stacked"
+                                                value={_contact.Other_Automated_Sytems__c}
+                                                class="step2"
+                                                onchange={handleStep2FormChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                        <!-- PMS Systems Group -->
+                        <article class="slds-card slds-size_1-of-1 lightgrayBorder">
+                            <div class="slds-card__header slds-size_1-of-1">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-link slds-truncate">
+                                            <span>PMS Systems:</span>
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="Opera__c"
+                                                type="checkbox"
+                                                label="Opera"
+                                                checked={_contact.Opera__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="OnQ__c"
+                                                type="checkbox"
+                                                label="OnQ"
+                                                checked={_contact.OnQ__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="Galaxy_LightSpeed__c"
+                                                type="checkbox"
+                                                label={galaxyLabel}
+                                                checked={_contact.Galaxy_LightSpeed__c}
+                                                variant="label-stacked"
+                                                style="overflow-wrap: break-word;"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="Opera_Cloud__c"
+                                                type="checkbox"
+                                                label="Opera Cloud"
+                                                checked={_contact.Opera_Cloud__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="Fosse__c"
+                                                type="checkbox"
+                                                label="Fosse"
+                                                checked={_contact.Fosse__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-4 slds-large-size_1-of-6">
+                                        <lightning-input
+                                                name="Marsha__c"
+                                                type="checkbox"
+                                                label="Marsha"
+                                                checked={_contact.Marsha__c}
+                                                variant="label-stacked"
+                                                class="step2"
+                                                onchange={handleStep2CheckboxChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                        <lightning-input
+                                                name="Other_PMS_Systems__c"
+                                                label="Other PMS Systems:"
+                                                variant="label-stacked"
+                                                value={_contact.Other_PMS_Systems__c}
+                                                class="step2"
+                                                onchange={handleStep2FormChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                        <!-- Languages Group -->
+                        <article class="slds-card slds-size_1-of-1 lightgrayBorder">
+                            <div class="slds-card__header slds-size_1-of-1">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-link slds-truncate">
+                                            <span>Languages:</span>
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                        <lightning-dual-listbox
+                                                name="Languages__c"
+                                                label="Select Languages"
+                                                source-label="Available"
+                                                selected-label="Selected"
+                                                field-level-help="Select your preferred languages"
+                                                value={selectedLanguages}
+                                                options={languageOptions.data}
+                                                class="step2 slds-p-horizontal_xx-small"
+                                                onchange={handleStep2FormChange}
+                                        ></lightning-dual-listbox>
+                                    </div>
+                                    <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                        <lightning-input
+                                                name="Other_Languages__c"
+                                                label="Other Languages:"
+                                                variant="label-stacked"
+                                                value={_contact.Other_Languages__c}
+                                                class="step2"
+                                                onchange={handleStep2FormChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </template>
+            <!-- Profile Picture & Resume END -->
+
+            <!-- Hotel Brands BEGIN -->
+            <template if:true={isStep3}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small slds-size_1-of-1">
+                    <div class="contentPadding">
+                        <h1 class="slds-card__header-title">Hotel Brands</h1>
+                        <div class="slds-p-vertical_small">
+                            <p>
+                                Select all the Family of Brands and Brands you have worked for. Select “Other” on Family
+                                of Brands if Brand is not available and then enter the name in the “Other Brands” field.
+                                Enter each one on a separate screen by clicking on “Add Brand” until you are finished
+                                adding all the Hotel Brands you have worked for. Then click “Next” to be taken to Step 4.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contentPadding">
+                        <template for:each={_brands} for:item="brand" for:index="i">
+                            <div key={brand.key} class="slds-p-bottom_small">
+                                <article if:false={brand.isOpen} class="slds-card slds-size_1-of-1 lightgrayBorder">
+                                    <div class="slds-card__header slds-size_1-of-1 slds-p-bottom_small">
+                                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__body slds-size_1-of-1 slds-grid slds-wrap">
+                                                <h2 class="slds-text-heading_medium slds-truncate slds-size_1-of-2">
+                                                    <span>{brand.Family_of_Brands__c}</span>
+                                                </h2>
+                                                <div class="slds-text-align_right slds-size_1-of-2">
+                                                    <lightning-icon
+                                                            if:true={brand.isDeletable}
+                                                            icon-name="utility:delete"
+                                                            class="slds-p-right_small"
+                                                            title="Brand Delete"
+                                                            alternative-text="Brand Delete"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleBrandRemove}
+                                                    ></lightning-icon>
+                                                    <lightning-icon
+                                                            icon-name="utility:chevronleft"
+                                                            title="Brand Collapsed"
+                                                            alternative-text="Brand Collapsed"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleBrandExpand}
+                                                    ></lightning-icon>
+                                                </div>
+                                            </div>
+                                        </header>
+                                    </div>
+                                </article>
+
+                                <article if:true={brand.isOpen} class="slds-card slds-size_1-of-1 lightgrayBorder">
+                                    <div class="slds-card__header slds-size_1-of-1">
+                                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__body slds-size_1-of-1 slds-grid slds-wrap">
+                                                <h2 class="slds-card__header-link slds-truncate slds-size_1-of-2">
+                                                    <span>Brand {brand.key}</span>
+                                                </h2>
+                                                <div class="slds-text-align_right slds-size_1-of-2">
+                                                    <lightning-icon
+                                                            if:true={brand.isDeletable}
+                                                            icon-name="utility:delete"
+                                                            class="slds-p-right_small"
+                                                            title="Brand Delete"
+                                                            alternative-text="Brand Delete"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleBrandRemove}
+                                                    ></lightning-icon>
+                                                    <lightning-icon
+                                                            icon-name="utility:chevrondown"
+                                                            title="Brand Expanded"
+                                                            alternative-text="Brand Expanded"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleBrandExpand}
+                                                    ></lightning-icon>
+                                                </div>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    <div class="slds-card__body slds-card__body_inner">
+                                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                            <div class="slds-size_1-of-1 slds-medium-size_2-of-5">
+                                                <lightning-combobox
+                                                        name="Family_of_Brands__c"
+                                                        label="Family of Brands:"
+                                                        variant="label-stacked"
+                                                        value={brand.Family_of_Brands__c}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step3"
+                                                        options={familyOfBrandsOptions.data}
+                                                        data-index={i}
+                                                        onchange={handleStep3FormChange}
+                                                        required
+                                                ></lightning-combobox>
+                                                <lightning-input
+                                                        name="Other_Brand__c"
+                                                        label="Other Brands:"
+                                                        variant="label-stacked"
+                                                        value={brand.Other_Brand__c}
+                                                        class="step3 otherBrandDesktop"
+                                                        data-index={i}
+                                                        onchange={handleStep3FormChange}
+                                                ></lightning-input>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_3-of-5 slds-p-left_xx-small">
+                                                <div if:true={brand.brandsOptions}>
+                                                    <lightning-dual-listbox
+                                                            name="Brands__c"
+                                                            label="Brands"
+                                                            source-label="Available"
+                                                            selected-label="Selected"
+                                                            field-level-help="Select your brands"
+                                                            options={brand.brandsOptions}
+                                                            value={brand.selectedOptions}
+                                                            class="step3"
+                                                            data-index={i}
+                                                            onchange={handleStep3FormChange}
+                                                    ></lightning-dual-listbox>
+                                                </div>
+                                            </div>
+                                            <div class="slds-size_1-of-1">
+                                                <lightning-input
+                                                        name="Other_Brand__c"
+                                                        label="Other Brands:"
+                                                        variant="label-stacked"
+                                                        value={brand.Other_Brand__c}
+                                                        class="step3 otherBrandMobile"
+                                                        data-index={i}
+                                                        onchange={handleStep3FormChange}
+                                                ></lightning-input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="slds-size_1-of-1 slds-text-align_right">
+                        <lightning-button
+                                variant="brand-outline"
+                                label="+ Add Brand"
+                                onclick={addBrand}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </template>
+            <!-- Hotel Brands END -->
+
+            <!-- Recent Employment History Review BEGIN -->
+            <template if:true={isStep4}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small slds-size_1-of-1">
+                    <div class="contentPadding">
+                        <h1 class="slds-card__header-title">A review of your recent employment history</h1>
+                        <div class="slds-p-vertical_small">
+                            <p>
+                                Provide employment history details. Enter each one on a separate screen by clicking on
+                                “Add Employment History” until you are finished adding all your relevant employment
+                                history. Then click “Save” to complete your profile.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contentPadding">
+                        <template for:each={_jobExperience} for:item="job" for:index="i">
+                            <div key={job.key} class="slds-p-bottom_small">
+                                <article if:false={job.isOpen} class="slds-card slds-size_1-of-1 lightgrayBorder">
+                                    <div class="slds-card__header slds-size_1-of-1 slds-p-bottom_small">
+                                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__body slds-size_1-of-1 slds-grid slds-wrap">
+                                                <h2 class="slds-text-heading_medium slds-truncate slds-size_1-of-2">
+                                                    <span>{job.Hotel_Property_Name__c}</span>
+                                                </h2>
+                                                <div class="slds-text-align_right slds-size_1-of-2">
+                                                    <lightning-icon
+                                                            if:true={job.isDeletable}
+                                                            icon-name="utility:delete"
+                                                            class="slds-p-right_small"
+                                                            title="Job Delete"
+                                                            alternative-text="Job Delete"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleJobExperienceRemove}
+                                                    ></lightning-icon>
+                                                    <lightning-icon
+                                                            icon-name="utility:chevronleft"
+                                                            title="Job Collapsed"
+                                                            alternative-text="Job Collapsed"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleJobExperienceExpand}
+                                                    ></lightning-icon>
+                                                </div>
+                                            </div>
+                                        </header>
+                                    </div>
+                                </article>
+
+                                <article if:true={job.isOpen} class="slds-card slds-size_1-of-1 lightgrayBorder">
+                                    <div class="slds-card__header slds-size_1-of-1">
+                                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__body slds-size_1-of-1 slds-grid slds-wrap">
+                                                <h2 class="slds-card__header-link slds-truncate slds-size_1-of-2">
+                                                    <span>Recent Employee History {job.key}</span>
+                                                </h2>
+                                                <div class="slds-text-align_right slds-size_1-of-2">
+                                                    <lightning-icon
+                                                            if:true={job.isDeletable}
+                                                            icon-name="utility:delete"
+                                                            class="slds-p-right_small"
+                                                            title="Job Delete"
+                                                            alternative-text="Job Delete"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleJobExperienceRemove}
+                                                    ></lightning-icon>
+                                                    <lightning-icon
+                                                            icon-name="utility:chevrondown"
+                                                            title="Job Expanded"
+                                                            alternative-text="Job Expanded"
+                                                            data-index={i}
+                                                            size="small"
+                                                            onclick={handleJobExperienceExpand}
+                                                    ></lightning-icon>
+                                                </div>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    <div class="slds-card__body slds-card__body_inner">
+                                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                <lightning-input
+                                                        label="Hotel Property Name:"
+                                                        variant="label-stacked"
+                                                        name="Hotel_Property_Name__c"
+                                                        value={job.Hotel_Property_Name__c}
+                                                        placeholder="Hotel Name"
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                <lightning-input
+                                                        label="Job Title:"
+                                                        variant="label-stacked"
+                                                        name="Job_Title__c"
+                                                        value={job.Job_Title__c}
+                                                        placeholder="Title"
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                <lightning-combobox
+                                                        name="Property_State__c"
+                                                        label="State:"
+                                                        variant="label-stacked"
+                                                        value={job.Property_State__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={propertyStateOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                ></lightning-combobox>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                <lightning-input
+                                                        label="Property City"
+                                                        variant="label-stacked"
+                                                        name="Property_City__c"
+                                                        value={job.Property_City__c}
+                                                        placeholder="City"
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <!-- Employment Dates Section -->
+                                        <div class="slds-size_1-of-1 slds-p-top_small">
+                                            <h1 class="slds-card__header-title">Employment Dates</h1>
+                                        </div>
+
+                                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                            <div class="slds-size_1-of-2 slds-medium-size_1-of-4">
+                                                <lightning-combobox
+                                                        name="Start_Date_Month__c"
+                                                        label="Start Date Month:"
+                                                        variant="label-stacked"
+                                                        value={job.Start_Date_Month__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={employmentMonthOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                ></lightning-combobox>
+                                            </div>
+                                            <div class="slds-size_1-of-2 slds-medium-size_1-of-4">
+                                                <lightning-combobox
+                                                        name="Start_Date_Year__c"
+                                                        label="Start Date Year:"
+                                                        variant="label-stacked"
+                                                        value={job.Start_Date_Year__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={employmentYearOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                        required
+                                                ></lightning-combobox>
+                                            </div>
+                                            <div class="slds-size_1-of-2 slds-medium-size_1-of-4">
+                                                <lightning-combobox
+                                                        name="End_Date_Month__c"
+                                                        label="End Date Month:"
+                                                        variant="label-stacked"
+                                                        value={job.End_Date_Month__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={employmentMonthOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                ></lightning-combobox>
+                                            </div>
+                                            <div class="slds-size_1-of-2 slds-medium-size_1-of-4">
+                                                <lightning-combobox
+                                                        name="End_Date_Year__c"
+                                                        label="End Date Month:"
+                                                        variant="label-stacked"
+                                                        value={job.End_Date_Year__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={employmentYearOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                ></lightning-combobox>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-2">
+                                                <lightning-combobox
+                                                        name="Are_You_Still_Working_There__c"
+                                                        label="Are You Still Working There?"
+                                                        variant="label-stacked"
+                                                        value={job.Are_You_Still_Working_There__c}
+                                                        data-index={i}
+                                                        class="slds-p-horizontal_xx-small slds-p-bottom_x-small step4"
+                                                        options={stillWorkingThereOptions.data}
+                                                        placeholder="Select..."
+                                                        onchange={handleStep4FormChange}
+                                                ></lightning-combobox>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hotel Property Details Section -->
+                                        <div class="slds-size_1-of-1 slds-p-top_small">
+                                            <h1 class="slds-card__header-title">Hotel Property Details</h1>
+                                        </div>
+
+                                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
+                                                <lightning-input
+                                                        type="number"
+                                                        label="Numbers of Sleeping Rooms:"
+                                                        variant="label-stacked"
+                                                        name="of_Sleeping_Rooms__c"
+                                                        value={job.of_Sleeping_Rooms__c}
+                                                        onchange={handleStep4FormChange}
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
+                                                <lightning-input
+                                                        type="number"
+                                                        label="SqFt of Meeting Space:"
+                                                        variant="label-stacked"
+                                                        name="SqFt_of_Meeting_Space__c"
+                                                        value={job.SqFt_of_Meeting_Space__c}
+                                                        onchange={handleStep4FormChange}
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                            <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
+                                                <lightning-input
+                                                        type="number"
+                                                        label="Numbers of Restaurant Seats:"
+                                                        variant="label-stacked"
+                                                        name="of_Restaurant_Seats__c"
+                                                        value={job.of_Restaurant_Seats__c}
+                                                        onchange={handleStep4FormChange}
+                                                        data-index={i}
+                                                        class="step4"
+                                                ></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <!-- Employment Details Section -->
+                                        <div class="slds-size_1-of-1 slds-p-top_small">
+                                            <h1 class="slds-card__header-title">Employment Details</h1>
+                                        </div>
+
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Markets:"
+                                                    variant="label-stacked"
+                                                    name="Markets__c"
+                                                    value={job.Markets__c}
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    placeholder="Markets..."
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Position Duty 1:"
+                                                    variant="label-stacked"
+                                                    name="Achievement_1__c"
+                                                    value={job.Achievement_1__c}
+                                                    placeholder="Provide a position duty for this job..."
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    required
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Position Duty 2:"
+                                                    variant="label-stacked"
+                                                    name="Achievement_2__c"
+                                                    value={job.Achievement_2__c}
+                                                    placeholder="Provide a position duty for this job..."
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    required
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Position Duty 3:"
+                                                    variant="label-stacked"
+                                                    name="Achievement_3__c"
+                                                    value={job.Achievement_3__c}
+                                                    placeholder="Provide a position duty for this job..."
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Position Duty 4:"
+                                                    variant="label-stacked"
+                                                    name="Achievement_4__c"
+                                                    value={job.Achievement_4__c}
+                                                    placeholder="Provide a position duty for this job..."
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                        <div class="slds-size_1-of-1">
+                                            <lightning-textarea
+                                                    label="Position Duty 5:"
+                                                    variant="label-stacked"
+                                                    name="Achievement_5__c"
+                                                    value={job.Achievement_5__c}
+                                                    placeholder="Provide a position duty for this job..."
+                                                    onchange={handleStep4FormChange}
+                                                    data-index={i}
+                                                    class="step4"
+                                            ></lightning-textarea>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="slds-size_1-of-1 slds-text-align_right">
+                        <lightning-button
+                                variant="brand-outline"
+                                label="+ Add Employment History"
+                                onclick={addJobExperience}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </template>
+            <!-- Recent Employment History Review END -->
+
+            <!-- Additional Information BEGIN -->
+            <template if:true={isStep5}>
+                <div class="slds-p-horizontal_medium slds-p-vertical_small slds-size_1-of-1">
+                    <div class="contentPadding">
+                        <h1 class="slds-card__header-title">Additional Information</h1>
+                    </div>
+
+                    <div class="contentPadding">
+                        <div class="slds-size_1-of-1 slds-grid slds-wrap">
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Current Salary"
+                                        input="number"
+                                        variant="label-stacked"
+                                        name="Current_Salary__c"
+                                        value={_contact.Current_Salary__c}
+                                        placeholder="100,000.00"
+                                        onchange={handleStep5FormChange}
+                                        class="step5"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Minimum Salary Requirement"
+                                        variant="label-stacked"
+                                        name="Minimum_Salary_Requirement__c"
+                                        value={_contact.Minimum_Salary_Requirement__c}
+                                        placeholder="200,000.00"
+                                        onchange={handleStep5FormChange}
+                                        class="step5"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <lightning-input
+                                        label="Current Position Title"
+                                        variant="label-stacked"
+                                        name="Current_Position_Title__c"
+                                        value={_contact.Current_Position_Title__c}
+                                        onchange={handleStep5FormChange}
+                                        class="step5"
+                                        max-length="250"
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-p-left_xx-small">
+                                <div class="slds-size_1-of-2 slds-small-size_1-of-4">
+                                    <lightning-input
+                                            type="checkbox"
+                                            label="Will Relocate"
+                                            name="Will_Relocate__c"
+                                            checked={_contact.Will_Relocate__c}
+                                            onchange={handleStep5FormChange}
+                                            class="step5 slds-align_absolute-center"
+                                    ></lightning-input>
+                                </div>
+                                <div class="slds-size_1-of-2 slds-small-size_1-of-4">
+                                    <lightning-input
+                                            type="checkbox"
+                                            label="US Citizen"
+                                            name="US_Citizen__c"
+                                            checked={_contact.US_Citizen__c}
+                                            onchange={handleStep5FormChange}
+                                            class="step5 slds-align_absolute-center"
+                                    ></lightning-input>
+                                </div>
+                            </div>
+                            <div class="slds-size_1-of-1 slds-small-size_1-of-2">
+                                <p class="slds-p-top_x-small">If not US Citizen enter the Country you are a citizen of below</p>
+                                <lightning-input
+                                        label="Other Country Citizen"
+                                        variant="label-stacked"
+                                        name="Other_Country_Citizen__c"
+                                        value={_contact.Other_Country_Citizen__c}
+                                        onchange={handleStep5FormChange}
+                                        class="step5"
+                                        max-length="60"
+                                ></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <!-- Additional Information END -->
+        </div>
+        <div slot="footer" class="slds-size_1-of-1">
+            <div class="slds-align_absolute-center slds-p-bottom_small">
+                <lightning-button
+                        variant="brand"
+                        label="Previous"
+                        disabled={isStep1}
+                        class="slds-p-horizontal_small"
+                        onclick={previousStep}
+                ></lightning-button>
+                <lightning-button
+                        variant="brand"
+                        label={saveButtonLabel}
+                        class="slds-p-horizontal_small"
+                        onclick={handleSave}
+                ></lightning-button>
+            </div>
+        </div>
+    </article>
+</template>

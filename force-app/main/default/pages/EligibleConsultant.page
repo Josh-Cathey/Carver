@@ -1,0 +1,53 @@
+<apex:page standardController="Opportunity" extensions="EligibleConsultantController" doctype="html-5.0" sidebar="false" 
+           action="{!getEligibleConsultant}" standardStylesheets="false">
+
+    <title>Eligible Consultant</title>            
+   
+    <c:EligibleConsultantCSS />
+     
+    <div class="container">                          
+        <div id="listConsultant">                    
+           <table id="example" class="display" cellspacing="0" width="100%">
+                 <thead>
+                    <tr>
+                        <th><input name="select_all" value="1" id="example-select-all" type="checkbox" /></th>
+                        <th>Name</th>
+                        <th>Interested</th>
+                        <th>Status</th>                                    
+                        <th>CI/TY</th>
+                        <th>Delphi</th>
+                        <th>Envision</th>
+                        <th>ISAC</th>
+                        <th>SalesPro</th>
+                        <th id="rating">Consultant Rating</th>
+                    </tr> 
+                </thead>
+            </table>   
+
+            <div id="btnDiv" style="text-align:center;margin-top:0.75em;">
+                <!-- <button id="saveBtn" class="slds-button slds-button--brand">Save</button>-->
+            </div> 
+        </div>
+                    
+        <div id="popupBackground">
+            <div id="loading">
+                <img style="width:100%;" 
+                     src="{!URLFOR($Resource.SLDS0122, '/assets/images/spinners/slds_spinner_inverse.gif')}" 
+                     alt="Loading..."/>
+            </div>
+        </div>
+    </div>
+    <div id="noEligibleConsultant" style="display:none;">
+        <span>No Eligible Consultant</span>
+    </div> 
+    <div id="popupMsgDiv" class="overlay"> 
+        <div class="popup">
+            <a class="close" id="closeBtn" style="color: white;" href="#">&times;</a>
+            <span class="content" id="popupAlertMsg"></span>
+        </div>
+    </div>        
+    
+    <c:EligibleConsultantJS eligibleConsultant="{!eligibleConsultant}" eligibleConsultantJSON="{!eligibleConsultantJSON}" 
+                               opp="{!opp}"/>   
+        
+</apex:page>

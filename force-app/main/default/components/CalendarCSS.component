@@ -1,0 +1,56 @@
+<apex:component >
+	  
+    <style>
+        @media all{
+            *{margin:0; padding:0; box-sizing:border-box; font-family: 'Montserrat', sans-serif;}
+            html, body{font-family: 'Montserrat', sans-serif; color: #122e37;}
+            body{background-color: #f8fbfc;}
+            .container{margin:0 auto; }
+        	.fc{border: 1px solid #ccc;}
+            .fc-toolbar { margin: 0; background: #fff; color: #5a5a5a; height: 50px; line-height: 50px; font-size: 18px;}
+            .fc-left,  .fc-right{padding: 11px;}
+            .fc-toolbar button{font-size:13px; text-transform: capitalize; background: #fff;color: #2767a5;font-weight: normal;text-shadow: 0 0 0 transparent}
+            .fc-toolbar button.fc-state-active {border-color: #016ccc; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15), 0 1px 0px rgba(0, 0, 0, 0.05); background: #016ccc!important; color:#fff;}
+            .fc-toolbar .fc-center h2 {font-size: 16px;}
+            th.fc-day-header {font-size: 12px; padding: 6px;border-color: transparent; background: #fff;  font-weight: 400;}
+            .fc td {background: #fff; border-color: #E8EDEF; font-size: 14px; color: #46626B; font-weight: 400;} 
+             td.fc-day:hover{ cursor:pointer; background-color:#E5F6FF;}
+            .fc-event {border: 1px solid transparent; background-color: #2A9ED8;}  
+            .modalBg { background: rgba(0,0,0,0.5); position: absolute; left: 0; top: 0; width: 100%;height: 100%; z-index: 9;} 
+            .modal { background: #fff;  margin: 50px auto; border-radius: 5px;}
+            .modalHeader { height: 40px; line-height: 40px; border-bottom: 1px solid #E0E0E0; padding-left: 15px; font-size: 14px; position: relative;}
+            .modalBody {padding: 15px; max-height: 400px; overflow-y: auto;}
+            a.modalClose {position: absolute;right: 0; top: 0; margin: -23px -15px;color: #FFF; text-decoration: none}
+            .modalFooter { text-align: right; padding: 10px 10px; border-top: 1px solid #E0E0E0;}
+            .btn {font-size: 12px;text-decoration: none; min-width: 75px; text-align: center; height: 28px; display: inline-block;line-height: 28px; padding: 0 15px; border-radius: 3px;}
+            .btnBlue { background: #1f97d5;color: #fff; border: 1px solid #1f97d5;}
+            .btnDefault { background: #fff;  border: 1px solid #E4E4E4; color: #65848C;}
+             #cancelBtn{text-decoration: none;}
+            .fc-time-grid-container{display:none;}
+            .fc-row .fc-bg {height: auto;}
+            //.fc-row .fc-bg {min-height:100px;height: auto;border-bottom:2px solid grey;}
+       }
+        
+        @media (min-width:900px){
+            .container{width:900px;}
+         }
+        
+        @media (min-width:520px){
+           .modal{width: 500px;}
+        }
+        @media (max-width:510px){
+            .modal{width:95%;}
+            a.modalClose { margin: -33px 0px;}
+        }
+        
+        label[for="notAvailableStartDate"]:after, 
+        label[for="notAvailableEndDate"]:after, 
+        label[for="consultant"]:after {
+            color: #CC0000;
+            content: ' *';                
+            display: inline;                
+        }  
+    
+    </style>
+  
+</apex:component>

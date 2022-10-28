@@ -1,0 +1,8 @@
+<aura:component implements="lightning:availableForFlowScreens" >
+    <aura:attribute name="fileId" type="String"/>
+
+    <div class="styles">
+	    <lightning:fileCard fileId="{!v.fileId}" hideDescription="true" />
+    </div>
+    
+</aura:component>
