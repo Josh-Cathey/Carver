@@ -5,11 +5,12 @@
 public with sharing class ContentDocumentLinkTriggerHelper {
 
     private static final String CONSULTANT_HISTORY = 'Consultant_History__c';
+    private static final String APPROVAL = 'Approval__c';
     private static final String ALL_USERS = 'AllUsers';
 
     public static void beforeInsert(List<ContentDocumentLink> contentDocumentLinks) {
         for (ContentDocumentLink cdl : contentDocumentLinks) {
-            if (cdl.LinkedEntityId != null && getSObjectTypeFromId(cdl.LinkedEntityId) == CONSULTANT_HISTORY) {
+            if (cdl.LinkedEntityId != null && (getSObjectTypeFromId(cdl.LinkedEntityId) == CONSULTANT_HISTORY||getSObjectTypeFromId(cdl.LinkedEntityId) == APPROVAL)) {
                 cdl.Visibility = ALL_USERS;
             }
         }

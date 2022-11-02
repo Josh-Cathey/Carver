@@ -14,6 +14,7 @@ private class ContentDocumentLinkTriggerTest {
         Contact contact = new Contact();
         contact.AccountId = account.Id;
         contact.LastName = 'Contact';
+        contact.email = 'test@advic.com';
         insert contact;
 
         Consultant_History__c consultantHistory = new Consultant_History__c();
