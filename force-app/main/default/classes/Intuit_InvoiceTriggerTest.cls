@@ -12,7 +12,7 @@ public class Intuit_InvoiceTriggerTest {
     static void setupData() {
         Account acc = new Account(Name='Test');
         insert acc;
-        QB_Activity__c invoiceTest = new QB_Activity__c(Account__c = acc.Id, Total_Due__c=12.99);
+        QB_Activity__c invoiceTest = new QB_Activity__c(Account__c = acc.Id, Total__c=12.99);
         RecordType r = [SELECT Id FROM RecordType WHERE Name='Invoice'];
         invoiceTest.RecordType = r;
         invoiceTest.Send_to_Quickbooks__c = false;
@@ -22,8 +22,8 @@ public class Intuit_InvoiceTriggerTest {
 
     @IsTest
     static void testUpdateTrigger(){
-        QB_Activity__c inv = [SELECT Id, Name, Invoice_Number__c FROM QB_Activity__c WHERE Total_Due__c = 12.99];
-        inv.Total_Due__c = 20.00;
+        QB_Activity__c inv = [SELECT Id, Name, Invoice_Number__c FROM QB_Activity__c WHERE Total__c = 12.99];
+        inv.Total__c = 20.00;
         inv.Send_to_Quickbooks__c = true;
         inv.QB_Invoice_ID__c = '1';
 
