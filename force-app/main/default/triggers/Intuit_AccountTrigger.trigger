@@ -13,7 +13,7 @@ Changelog:
 
 trigger Intuit_AccountTrigger on Account (before update, after insert) {
     if (Trigger.isBefore) {
-        if(Trigger.isUpdate) {
+        if (Trigger.isUpdate) {
             Intuit_AccountTriggerHandler.updateCustomerAccounts(Trigger.new, Trigger.old, Trigger.newMap, Trigger.oldMap);
         }
     }
