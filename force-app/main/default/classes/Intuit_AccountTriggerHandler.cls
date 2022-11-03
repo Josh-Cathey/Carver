@@ -1,9 +1,9 @@
-public with sharing class Intuit_AccountTriggerHandler {
+public without sharing class Intuit_AccountTriggerHandler {
     public Intuit_AccountTriggerHandler() {}
 
-    public static void updateCustomerAccounts() {
+    public static void updateCustomerAccounts(List<Account> newRecords, List<Account> oldRecords, Map<ID, Account> newRecordsMap, Map<ID, Account> oldRecordsMap) {
         for(Account acc : trigger.new) {
-            if(acc.ParentId != Trigger.oldMap.get(acc.Id).ParentId && !String.isEmpty(acc.ParentId) && !acc.Do_Not_Sync_to_QBs__c) {
+            if(acc.ParentId != oldRecordsMap.get(acc.Id).ParentId && !String.isEmpty(acc.ParentId) && !acc.Do_Not_Sync_to_QBs__c) {
                 Account parentAcc = [SELECT Id, Quickbooks_ID__c
                                     FROM Account
                                     WHERE Id =: acc.ParentId];
@@ -18,7 +18,7 @@ public with sharing class Intuit_AccountTriggerHandler {
         }
     }
 
-    public static void createCustomerAccounts() {
+    public static void createCustomerAccounts(List<Account> newAccounts) {
 
     }
 }

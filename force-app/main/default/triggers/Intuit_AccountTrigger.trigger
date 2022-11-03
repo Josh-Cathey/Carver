@@ -11,14 +11,15 @@ Changelog:
         - Updated to work for insert
 */
 
-trigger Intuit_AccountTrigger on Account (before update, before insert) {
+trigger Intuit_AccountTrigger on Account (before update, after insert) {
     if (Trigger.isBefore) {
         if(Trigger.isUpdate) {
-            Intuit_AccountTriggerHandler.updateCustomerAccounts();
+            Intuit_AccountTriggerHandler.updateCustomerAccounts(Trigger.new, Trigger.old, Trigger.newMap, Trigger.oldMap);
         }
-    
+    }
+    else {     
         if (Trigger.isInsert) {
-            Intuit_AccountTriggerHandler.createCustomerAccounts();
+            Intuit_AccountTriggerHandler.createCustomerAccounts(Trigger.new);
         }
     }
 } 
