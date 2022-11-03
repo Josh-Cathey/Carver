@@ -1,4 +1,5 @@
-public class Intuit_AccountTriggerHandler {
+public with sharing class Intuit_AccountTriggerHandler {
+    public Intuit_AccountTriggerHandler() {}
 
     public static void updateCustomerAccounts() {
         for(Account acc : trigger.new) {

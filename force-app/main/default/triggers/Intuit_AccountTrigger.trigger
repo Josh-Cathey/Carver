@@ -11,9 +11,7 @@ Changelog:
         - Updated to work for insert
 */
 
-// Need to update for insert
 trigger Intuit_AccountTrigger on Account (before update, before insert) {
-
     if (Trigger.isBefore) {
         if(Trigger.isUpdate) {
             Intuit_AccountTriggerHandler.updateCustomerAccounts();
@@ -23,5 +21,4 @@ trigger Intuit_AccountTrigger on Account (before update, before insert) {
             Intuit_AccountTriggerHandler.createCustomerAccounts();
         }
     }
-
 } 
