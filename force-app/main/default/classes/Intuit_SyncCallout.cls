@@ -67,7 +67,7 @@ public class Intuit_SyncCallout {
         req.setMethod('POST');
         req.setEndpoint(endpoint + urlParamStr);
         String body = generateBody(objectRecordType, recordId, syncToken, fieldUpdate);
-        System.debug('body ' +body);
+        System.debug('body ' + body);
         req.setBody(body);
         req.setHeader('content-type', 'application/json');
         req.setHeader('accept', 'application/json');
@@ -77,7 +77,7 @@ public class Intuit_SyncCallout {
         HttpResponse response = http.send(req);
         try {
             String jsonBody = response?.toString();
-            System.debug('QuickBooks Customer response' + jsonBody);
+            System.debug('QuickBooks Customer response -> ' + jsonBody);
         } 
         catch (Exception e) {
             System.debug('Exception Caught Sending QB Account Query: ' + e.getMessage() + ' | ' + e.getStackTraceString());
@@ -88,7 +88,7 @@ public class Intuit_SyncCallout {
 
     //ObjectRecordType == 'Invoice' or 'Customer' = (SF Account)
     @TestVisible
-    public static String getSyncTokenValue(String objectRecordType, String recordId){
+    public static String getSyncTokenValue(String objectRecordType, String recordId) {
         String syncToken;
         Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].IsSandbox;
         Quickbooks_API_Information__mdt QBMetaConfig;
@@ -105,8 +105,8 @@ public class Intuit_SyncCallout {
                         FROM Quickbooks_Configuration__c
                         WHERE configId__c =: (isSandbox? 'Sandbox': 'Production') LIMIT 1]?.accessToken__c;
         System.debug('QBmeta: ' + QBMetaConfig);
-        System.debug('IsSandbox' + isSandbox);
-        System.debug('AccessToken' + QBAccessToken);
+        System.debug('IsSandbox ' + isSandbox);
+        System.debug('AccessToken ' + QBAccessToken);
 
         String realmId = QBMetaConfig.Realm_ID__c;
         String endpoint = QBMetaConfig.Endpoint__c;
@@ -124,13 +124,13 @@ public class Intuit_SyncCallout {
 
         try {
             jsonBody = response?.getBody();
-            System.debug('QuickBooks SyncToken response' + jsonBody);
+            System.debug('QuickBooks SyncToken response -> ' + jsonBody);
         } 
         catch (Exception e) {
             System.debug('Exception Caught getting syncToken Query: ' + e.getMessage() + ' | ' + e.getStackTraceString());
             throw e;
         }
-        System.debug('response' + jsonBody);
+        System.debug('response -> ' + jsonBody);
         Map<String, Object> res = (Map<String, Object>) JSON.deserializeUntyped(jsonBody);
         Map<String, Object> data = (Map<String, Object>) res.get(objectRecordType);
 
