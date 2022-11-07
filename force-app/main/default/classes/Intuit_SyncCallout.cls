@@ -67,7 +67,7 @@ public class Intuit_SyncCallout {
         req.setMethod('POST');
         req.setEndpoint(endpoint + urlParamStr);
         String body = generateBody(objectRecordType, recordId, syncToken, fieldUpdate);
-        System.debug('body ' + body);
+        System.debug('body -> ' + body);
         req.setBody(body);
         req.setHeader('content-type', 'application/json');
         req.setHeader('accept', 'application/json');
