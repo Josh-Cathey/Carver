@@ -14,12 +14,12 @@ Changelog:
 trigger Intuit_AccountTrigger on Account (before update, after insert) {
     if (Trigger.isBefore) {
         if (Trigger.isUpdate) {
-            Intuit_AccountTriggerHandler.updateCustomerAccounts(Trigger.new, Trigger.old, Trigger.newMap, Trigger.oldMap);
+            Intuit_AccountTriggerHandler.syncUpdatedCustomerAccounts(Trigger.new, Trigger.old, Trigger.newMap, Trigger.oldMap);
         }
     }
     else {     
         if (Trigger.isInsert) {
-            Intuit_AccountTriggerHandler.createCustomerAccounts(Trigger.new);
+            Intuit_AccountTriggerHandler.syncNewCustomerAccounts(Trigger.new);
         }
     }
 } 
