@@ -8,26 +8,14 @@ Changelog:
 */
 
 public without sharing class Intuit_AccountTriggerHandler {
-    public Intuit_AccountTriggerHandler() {}
 
     public static void syncUpdatedCustomerAccounts(List<Account> newRecords, List<Account> oldRecords, Map<ID, Account> newRecordsMap, Map<ID, Account> oldRecordsMap) {
         for (Account updatedAccount : newRecords) {
-            if (hasParentAccount(updatedAccount) && updatedAccount.ParentId != oldRecordsMap.get(updatedAccount.Id).ParentId && !updatedAccount.Do_Not_Sync_to_QBs__c) {
+            if (hasParentAccount(updatedAccount) && !updatedAccount.Do_Not_Sync_to_QBs__c && String.isNotBlank(updatedAccount.Quickbooks_ID__c)) {
                 Account parentAccount = getParentAccount(updatedAccount);
-                System.debug('Intuit Account Update Trigger -> parentAccount: ' + parentAccount);
+                System.debug('Intuit_AccountTriggerHandler -> parentAccount: ' + parentAccount);
 
                 syncAccountHierarchyWithQB(updatedAccount, parentAccount);
-            }
-        }
-    }
-
-    public static void syncNewCustomerAccounts(List<Account> newRecords) {
-        for (Account newAccount : newRecords) {
-            if(hasParentAccount(newAccount) && !newAccount.Do_Not_Sync_to_QBs__c) {
-                Account parentAccount = getParentAccount(newAccount);
-                System.debug('Intuit Account Update Trigger -> parentAccount: ' + parentAccount);
-
-                syncAccountHierarchyWithQB(newAccount, parentAccount);
             }
         }
     }
@@ -42,8 +30,13 @@ public without sharing class Intuit_AccountTriggerHandler {
 
     private static void syncAccountHierarchyWithQB(Account acc, Account parentAccount) {
         if(!Test.isRunningTest()) {
-            if(String.isNotBlank(parentAccount.Quickbooks_ID__c)) {
+            if(String.isNotBlank(parentAccount.Quickbooks_ID__c) && String.isNotBlank(acc.Quickbooks_ID__c)) {
                 Intuit_SyncCallout.sparseUpdateQB('Customer', (String) acc.Quickbooks_ID__c, (String) parentAccount.Quickbooks_ID__c);
+            }
+            else {
+                System.debug('Intuit_AcccountTriggerHandler: Error in syncAccountHierarchyWithQB!!!');
+                System.debug('Updated Account Quickbooks_ID__c = ' + acc.Quickbooks_ID__c);
+                System.debug('Parent Account Quickbooks_ID__c = ' + parentAccount.Quickbooks_ID__c);
             }
         }
     }

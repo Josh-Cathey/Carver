@@ -7,41 +7,6 @@ Changelog:
         - Created initial file.
 */
 public class Intuit_SyncCallout {
-//    public static HttpResponse queryQB(Quickbooks_API_Information__mdt meta, String authToken, String objectRecordType) {
-//        //Temporary storage,TODO: move values away from static
-//        HttpRequest req = new HttpRequest();
-//        String endpoint = meta.Endpoint__c;
-//
-//        DateTime dt = DateTime.now() - 1;
-//        String dateTimeStr = dt.format('yyyy-MM-dd');
-//
-//        //TODO Need to store this realm ID in a custom metadata
-//        String realmId = meta.Realm_ID__c;
-//        String urlParamStr = '/v3/carver/' + realmId + '/query?query=';
-//        String quot = '\'';
-//        quot = EncodingUtil.urlEncode(quot, 'UTF-8');
-//        String queryString = 'SELECT DisplayName FROM ' + objectRecordType + ' WHERE Metadata.LastUpdatedTime = ' + quot + dateTimeStr + quot + '" ORDER BY Metadata.LastUpdatedTime';
-//        queryString = queryString.replace(' ', '+');
-//
-//
-//        req.setMethod('GET');
-//        req.setEndpoint(endpoint + urlParamStr + queryString + '&minorversion=65');
-//        req.setHeader('content-type', 'application/text');
-//        req.setHeader('accept', 'application/json');
-//        req.setHeader('authorization', authToken);
-//
-//        Http http = new Http();
-//        HttpResponse response = http.send(req);
-//        try {
-//            String jsonBody = response?.toString();
-//            System.debug('QuickBooks response' + jsonBody);
-//        } catch (Exception e) {
-//            System.debug('Exception Caught Sending QB Activity Query ' + objectRecordType + ' : ' + e.getMessage() + ' | ' + e.getStackTraceString());
-//        }
-//        //Parse the JSON
-//        return response;
-//    }
-
     //Utilized for Invoice and Customer record updates onto Quickbooks
     @future(callout=true)
     public static void sparseUpdateQB(String objectRecordType, String recordId, String fieldUpdate) {
@@ -61,8 +26,6 @@ public class Intuit_SyncCallout {
         //An intial callout for a syncToken
         String syncToken = getSyncTokenValue(objectRecordType, recordId);
         String urlParamStr = '/v3/company/' + QBMetaConfig.Realm_ID__c + '/' + objectRecordType.toLowerCase() + '?minorversion=65';
-        //String urlParamStr = '/v3/company/' + realmId + '/' + objectRecordType.toLowerCase() + '?minorversion=65';
-        //String queryString = 'SELECT * from Account WHERE Metadata.LastUpdatedTime >\'2015-01-16\' Order By Metadata.LastUpdatedTime';
 
         req.setMethod('POST');
         req.setEndpoint(endpoint + urlParamStr);

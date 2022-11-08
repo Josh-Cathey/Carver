@@ -17,9 +17,4 @@ trigger Intuit_AccountTrigger on Account (before update, after insert) {
             Intuit_AccountTriggerHandler.syncUpdatedCustomerAccounts(Trigger.new, Trigger.old, Trigger.newMap, Trigger.oldMap);
         }
     }
-    else {     
-        if (Trigger.isInsert) {
-            Intuit_AccountTriggerHandler.syncNewCustomerAccounts(Trigger.new);
-        }
-    }
 } 
