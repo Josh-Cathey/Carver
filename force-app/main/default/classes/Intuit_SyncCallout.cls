@@ -66,7 +66,51 @@ public class Intuit_SyncCallout {
 
         req.setMethod('POST');
         req.setEndpoint(endpoint + urlParamStr);
+
         String body = generateBody(objectRecordType, recordId, syncToken, fieldUpdate);
+        System.debug('body -> ' + body);
+        req.setBody(body);
+        req.setHeader('content-type', 'application/json');
+        req.setHeader('accept', 'application/json');
+        req.setHeader('authorization','bearer ' + QBAccessToken);
+
+        Http http = new Http();
+        HttpResponse response = http.send(req);
+        try {
+            String jsonBody = response?.toString();
+            System.debug('QuickBooks Customer response -> ' + jsonBody);
+        } 
+        catch (Exception e) {
+            System.debug('Exception Caught Sending QB Account Query: ' + e.getMessage() + ' | ' + e.getStackTraceString());
+            throw e;
+        }
+        System.debug(response.toString());
+    }
+
+    //Utilized for Invoice and Customer record updates onto Quickbooks
+    @future(callout=true)
+    public static void createCustomerQB(String accountName) {
+        Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].IsSandbox;
+        Quickbooks_API_Information__mdt QBMetaConfig;
+        String QBAccessToken;
+
+        QBMetaConfig = isSandbox == false ? Quickbooks_API_Information__mdt.getInstance('Quickbooks_prod') : Quickbooks_API_Information__mdt.getInstance('Quickbooks_sbx');
+        QBAccessToken = [SELECT Id, accessToken__c
+                        FROM Quickbooks_Configuration__c
+                        WHERE configId__c = :(isSandbox ? 'Sandbox' : 'Production')
+                        LIMIT 1]?.accessToken__c;
+
+        HttpRequest req = new HttpRequest();
+        String endpoint = QBMetaConfig.endpoint__c;
+
+        //An intial callout for a syncToken
+        //String syncToken = getSyncTokenValue(objectRecordType, recordId);
+        String urlParamStr = '/v3/company/' + QBMetaConfig.Realm_ID__c + '/customer' + '?minorversion=65';
+
+        req.setMethod('POST');
+        req.setEndpoint(endpoint + urlParamStr);
+
+        String body = generateCreateCustomerBody(accountName);
         System.debug('body -> ' + body);
         req.setBody(body);
         req.setHeader('content-type', 'application/json');
@@ -104,6 +148,7 @@ public class Intuit_SyncCallout {
         QBAccessToken = [SELECT Id, accessToken__c, configId__c
                         FROM Quickbooks_Configuration__c
                         WHERE configId__c =: (isSandbox? 'Sandbox': 'Production') LIMIT 1]?.accessToken__c;
+
         System.debug('QBmeta: ' + QBMetaConfig);
         System.debug('IsSandbox ' + isSandbox);
         System.debug('AccessToken ' + QBAccessToken);
@@ -137,6 +182,9 @@ public class Intuit_SyncCallout {
         return data.get('SyncToken').toString();
     }
 
+    
+
+    // arg fieldUpdate = Quickbooks_ID__c for customer objectRecordType -> need to update to be more clear
     @TestVisible
     private static String generateBody(String objectRecordType, String recordId, String syncToken, String fieldUpdate) {
         JSONGenerator gen = JSON.createGenerator(false);
@@ -156,6 +204,16 @@ public class Intuit_SyncCallout {
             gen.writeStringField('value', fieldUpdate);
             gen.writeEndObject();
         }
+        gen.writeEndObject();
+
+        return gen.getAsString();
+    }
+
+    @TestVisible
+    private static String generateCreateCustomerBody(String accountName) {
+        JSONGenerator gen = JSON.createGenerator(false);
+        gen.writeStartObject();
+        gen.writeStringField('DisplayName', accountName);
         gen.writeEndObject();
 
         return gen.getAsString();
