@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "outcome": "Passed",
+    "testsRan": 1,
+    "passing": 1,
+    "failing": 0,
+    "skipped": 0,
+    "passRate": "100%",
+    "failRate": "0%",
+    "skipRate": "0%",
+    "testStartTime": "Tue Nov 08 2022 2:24:20 PM",
+    "testExecutionTimeInMs": 99,
+    "testTotalTimeInMs": 99,
+    "commandTimeInMs": 369,
+    "hostname": "https://carver--partialtf.sandbox.my.salesforce.com",
+    "orgId": "00D8D0000008hnnUAA",
+    "username": "jin@advictoriamsolutions.com.partialtf",
+    "testRunId": "7078D00001OBU0R",
+    "userId": "0055d00000CbjfLAAR"
+  },
+  "tests": [
+    {
+      "id": "07M8D000005EmpKUAS",
+      "queueItemId": "7098D000000kv1TQAQ",
+      "stackTrace": null,
+      "message": null,
+      "asyncApexJobId": "7078D00001OBU0RQAX",
+      "methodName": "testUpdateTrigger",
+      "outcome": "Pass",
+      "apexLogId": "07L8D000004J0TWUA0",
+      "apexClass": {
+        "id": "01p8D000005q11GQAQ",
+        "name": "Intuit_InvoiceTriggerTest",
+        "namespacePrefix": null,
+        "fullName": "Intuit_InvoiceTriggerTest"
+      },
+      "runTime": 99,
+      "testTimestamp": "2022-11-08T22:24:22.000+0000",
+      "fullName": "Intuit_InvoiceTriggerTest.testUpdateTrigger"
+    }
+  ]
+}

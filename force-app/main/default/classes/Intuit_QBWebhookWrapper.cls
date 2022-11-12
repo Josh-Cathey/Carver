@@ -26,16 +26,7 @@ public with sharing class Intuit_QBWebhookWrapper {
         public String lastUpdated;
     }
 
-    public static Intuit_QBWebhookWrapper jsonParse(String jsonBody){
-        Intuit_QBWebhookWrapper wrap;
-
-        try {
-            wrap = (Intuit_QBWebhookWrapper) JSON.deserialize(jsonbody, Intuit_QBWebhookWrapper.class);
-        }
-        catch(Exception e) {
-            System.debug('Exception Caught Json Parsing Response: ' + e.getMessage() + ' | ' + e.getStackTraceString());
-            throw e;
-        }
-        return wrap;
+    public static Intuit_QBWebhookWrapper jsonParse(String jsonBody) {
+        return (Intuit_QBWebhookWrapper) JSON.deserialize(jsonbody, Intuit_QBWebhookWrapper.class);
     }
 }

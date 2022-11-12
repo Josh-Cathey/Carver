@@ -6,11 +6,11 @@ Changelog:
     17 Oct 2022 by Christian.Jimenez for JIRA-01
         - Created initial file.
 */
-trigger Intuit_InvoiceTrigger on QB_Activity__c (before update){
+trigger Intuit_InvoiceTrigger on QB_Activity__c(before update) {
     Id invRecordtype = Schema.SObjectType.QB_Activity__c.getRecordTypeInfosByDeveloperName().get('Invoice').getRecordTypeId();
 
-    for(QB_Activity__c qbActivity: trigger.new){
-            if(qbActivity.RecordTypeId == invRecordtype){
+    for(QB_Activity__c qbActivity : trigger.new) {
+            if(qbActivity.RecordTypeId == invRecordtype) {
                 //Initially composer creates then pulls from QB and it's technically an update..
                 //testing against oldmap it would be null
 
@@ -23,8 +23,8 @@ trigger Intuit_InvoiceTrigger on QB_Activity__c (before update){
                     qbActivity.Invoice_Number__c = qbActivity.Name;
 
                     //Test callout is handled elsewhere
-                    if(!Test.isRunningTest()){
-                        Intuit_SyncCallout.sparseUpdateQB('Invoice', (String) qbActivity.QB_Invoice_ID__c, qbActivity.Name);
+                    if(!Test.isRunningTest()) {
+                        Intuit_SyncCallout.sparseUpdateQB('Invoice', (String) qbActivity.QB_Invoice_ID__c, (String) qbActivity.Name);
                     }
                 }
             }

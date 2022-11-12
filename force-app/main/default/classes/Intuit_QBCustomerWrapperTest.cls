@@ -12,7 +12,7 @@ public class Intuit_QBCustomerWrapperTest {
     @IsTest
     static void testParsePass(){
         Test.startTest();
-            Intuit_QBCustomerWrapper newCustomer = Intuit_QBCustomerWrapper.jsonParse(Intuit_MockResponse.getQBCustomerFullResp().getBody());
+       	Intuit_QBCustomerWrapper newCustomer = Intuit_QBCustomerWrapper.jsonParse(Intuit_MockResponse.getQBCustomerFullResp().getBody());
         Test.stopTest();
         System.debug(Intuit_MockResponse.getQBCustomerFullResp().getBody());
         System.debug(newCustomer);
