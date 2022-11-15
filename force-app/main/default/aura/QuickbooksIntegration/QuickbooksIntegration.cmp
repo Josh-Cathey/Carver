@@ -1,0 +1,30 @@
+<Aura:component controller="QuickbooksIntController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global">
+    <Aura:attribute name="isNotAuth" type="Boolean" default="true" />
+    <Aura:attribute name="clientKey" type="String"/>
+    <Aura:attribute name="clientSecret" type="String"/>
+    <Aura:attribute name="redirectURI" type="String" />
+    <Aura:attribute name="companyId" type="String" />
+    <Aura:attribute name="scope" type="String" default="com.intuit.quickbooks.accounting com.intuit.quickbooks.payment"/>
+    <Aura:attribute name="isAuth" type="Boolean" default="true" />
+    <!-- <Aura:registerEvent name="Custom_Toast" type="c:Custom_Toast" /> -->
+    <Aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <!-- <c:Custom_ToastCmp/> -->
+    <Aura:if isTrue="{!v.isNotAuth}">
+        <div class="slds-align_absolute-center">
+            <div class="slds-p-bottom_large slds-p-left_large" style="width:500px">
+                <lightning:input name="clientKey" label="Client Key" value="{!v.clientKey}" />
+                <lightning:input name="clientSecret" label="Client Secret" value="{!v.clientSecret}" />
+                <lightning:input name="scope" label="Scope" value="{!v.scope}" />
+                <div class="slds-align_absolute-center">
+                    <lightning:button variant="destructive" label="Connect to Quickbooks" onclick="{!c.authorizeController}" />
+                </div>
+            </div>
+        </div>
+    </Aura:if>
+
+    <Aura:if isTrue="{!v.isAuth}">
+        Successfully Authorized with company having Id : {!v.companyId}
+    </Aura:if>
+
+</Aura:component>
